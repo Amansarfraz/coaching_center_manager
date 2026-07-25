@@ -34,16 +34,6 @@ class GetStartedScreen extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              const Text(
-                "Manage students, teachers, attendance,\nfees and batches with ease.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.white,
-                  height: 1.5,
-                ),
-              ),
-
               const Spacer(),
 
               SizedBox(

@@ -36,16 +36,16 @@ class _SplashScreenState extends State<SplashScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
 
             children: [
-              Image.asset("assets/images/logo.png", height: 220),
+              Image.asset("assets/images/logo.png", height: 350),
 
-              const SizedBox(height: 35),
+              const SizedBox(height: 45),
 
               const Text(
                 "Manage. Teach. Inspire.",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFFDB731F),
+                  color: AppColors.tagline,
                   letterSpacing: 1.2,
                 ),
               ),

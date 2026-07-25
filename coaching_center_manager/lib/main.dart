@@ -13,6 +13,7 @@ import 'providers/fee_provider.dart';
 
 // First Screen
 import 'screens/splash_screen.dart';
+import 'screens/get_started_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,8 +53,12 @@ class CoachingCenterApp extends StatelessWidget {
             foregroundColor: Colors.white,
           ),
         ),
+        initialRoute: '/',
 
-        home: const SplashScreen(),
+        routes: {
+          '/': (context) => const SplashScreen(),
+          '/get_started_screen': (context) => const GetStartedScreen(),
+        },
       ),
     );
   }

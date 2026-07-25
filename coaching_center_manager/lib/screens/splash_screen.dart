@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
-//import '../login_screen.dart';
+import 'get_started_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,10 +18,10 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
 
     Timer(const Duration(seconds: 3), () {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (_) => const LoginScreen()),
-      // );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const GetStartedScreen()),
+      );
     });
   }
 
@@ -36,14 +36,14 @@ class _SplashScreenState extends State<SplashScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
 
             children: [
-              Image.asset("assets/images/logo.png", height: 350),
+              Image.asset("assets/images/logo.png", height: 400),
 
-              const SizedBox(height: 45),
+              const SizedBox(height: 55),
 
               const Text(
                 "Manage. Teach. Inspire.",
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 25,
                   fontWeight: FontWeight.w600,
                   color: AppColors.tagline,
                   letterSpacing: 1.2,

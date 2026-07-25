@@ -1,64 +1,59 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-//import '../../constants/app_colors.dart';
-//import '../login_screen.dart';
+import 'constants/app_colors.dart';
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+// Providers
+import 'providers/auth_provider.dart';
+import 'providers/student_provider.dart';
+import 'providers/teacher_provider.dart';
+import 'providers/batch_provider.dart';
+import 'providers/attendance_provider.dart';
+import 'providers/fee_provider.dart';
 
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
+// First Screen
+import 'screens/splash_screen.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(const CoachingCenterApp());
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-
-    Timer(const Duration(seconds: 3), () {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (_) => const LoginScreen()),
-      // );
-    });
-  }
+class CoachingCenterApp extends StatelessWidget {
+  const CoachingCenterApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF86BFE2),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => StudentProvider()),
+        ChangeNotifierProvider(create: (_) => TeacherProvider()),
+        ChangeNotifierProvider(create: (_) => BatchProvider()),
+        ChangeNotifierProvider(create: (_) => AttendanceProvider()),
+        ChangeNotifierProvider(create: (_) => FeeProvider()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Coaching Center Manager',
 
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        theme: ThemeData(
+          useMaterial3: true,
+          scaffoldBackgroundColor: AppColors.scaffoldBackground,
+          primaryColor: AppColors.primary,
 
-            children: [
-              Image.asset("assets/images/logo.png", height: 220),
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
 
-              const SizedBox(height: 35),
-
-              const Text(
-                "Manage. Teach. Inspire.",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFDB731F),
-                  letterSpacing: 1.2,
-                ),
-              ),
-
-              const SizedBox(height: 50),
-
-              const CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 3,
-              ),
-            ],
+          appBarTheme: const AppBarTheme(
+            centerTitle: true,
+            elevation: 0,
+            backgroundColor: const Color(0xFF86BFE2),
+            foregroundColor: Colors.white,
           ),
         ),
+
+        home: const SplashScreen(),
       ),
     );
   }

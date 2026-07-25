@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
-import '../../constants/app_strings.dart';
-//import '../auth/login_screen.dart';
+//import '../login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -29,68 +28,33 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
+      backgroundColor: const Color(0xFF86BFE2),
 
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-
-            end: Alignment.bottomRight,
-
-            colors: [AppColors.primary, AppColors.primaryDark],
-          ),
-        ),
-
-        child: SafeArea(
+      body: SafeArea(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
 
             children: [
-              Image.asset("assets/images/logo.png", height: 130),
+              Image.asset("assets/images/logo.png", height: 220),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 35),
 
               const Text(
-                AppStrings.appName,
-
+                "Manage. Teach. Inspire.",
                 style: TextStyle(
-                  color: Colors.white,
-
-                  fontSize: 30,
-
-                  fontWeight: FontWeight.bold,
-
-                  letterSpacing: 1,
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-
-                child: Text(
-                  AppStrings.splashTagline,
-
-                  textAlign: TextAlign.center,
-
-                  style: TextStyle(color: Colors.white70, fontSize: 15),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFDB731F),
+                  letterSpacing: 1.2,
                 ),
               ),
 
               const SizedBox(height: 50),
 
-              const SizedBox(
-                width: 35,
-
-                height: 35,
-
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
-                ),
+              const CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 3,
               ),
             ],
           ),

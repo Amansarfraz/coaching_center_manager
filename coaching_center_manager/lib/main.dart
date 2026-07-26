@@ -15,6 +15,7 @@ import 'providers/fee_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/get_started_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/dashboard_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +61,7 @@ class CoachingCenterApp extends StatelessWidget {
           '/': (context) => const SplashScreen(),
           '/get_started_screen': (context) => const GetStartedScreen(),
           '/login_screen': (context) => const LoginScreen(),
+          '/dashboard_screen': (context) => const DashboardScreen(),
         },
       ),
     );

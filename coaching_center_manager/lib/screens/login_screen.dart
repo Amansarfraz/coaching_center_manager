@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-//import 'dashboard_screen.dart'; // Dashboard screen import
+import 'dashboard_screen.dart'; // Dashboard screen import
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,10 +36,10 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     // Backend API yahan call hogi
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(builder: (context) => const DashboardScreen()),
-    // );
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const DashboardScreen()),
+    );
   }
 
   @override

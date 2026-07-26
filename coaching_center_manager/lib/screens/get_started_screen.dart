@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
-// import 'auth/login_screen.dart';
+import 'login_screen.dart';
 
 class GetStartedScreen extends StatelessWidget {
   const GetStartedScreen({super.key});
@@ -41,12 +41,10 @@ class GetStartedScreen extends StatelessWidget {
                 height: 58,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigator.pushReplacement(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (_) => const LoginScreen(),
-                    //   ),
-                    // );
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,

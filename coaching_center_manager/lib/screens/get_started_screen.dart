@@ -18,9 +18,9 @@ class GetStartedScreen extends StatelessWidget {
               const Spacer(),
 
               // Logo
-              Image.asset("assets/images/logo.png", height: 320),
+              Image.asset("assets/images/logo.png", height: 400),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 55),
 
               const Text(
                 "Manage. Teach. Inspire.",
@@ -32,7 +32,7 @@ class GetStartedScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 60),
 
               const Spacer(),
 

@@ -109,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // TODO: Login API
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF122767),
+                      backgroundColor: Colors.white,
                       elevation: 4,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -120,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: const Color(0xFF122767),
                       ),
                     ),
                   ),

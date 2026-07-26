@@ -76,7 +76,7 @@ class GetStartedScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 60),
+              const SizedBox(height: 120),
             ],
           ),
         ),

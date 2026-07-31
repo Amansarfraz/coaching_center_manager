@@ -96,12 +96,12 @@ class _StudentListScreenState extends State<StudentListScreen> {
 
   void changeProfilePicture(int index) {
     List<String> images = [
-      "assets/images/student1.png",
-      "assets/images/student2.png",
-      "assets/images/student3.png",
-      "assets/images/student4.png",
-      "assets/images/student5.png",
-      "assets/images/student6.png",
+      "assets/images/pic1.jpg",
+      "assets/images/pic2.jpg",
+      "assets/images/pic3.jpg",
+      "assets/images/pic4.jpg",
+      "assets/images/pic5.jpg",
+      "assets/images/pic6.jpg",
     ];
 
     showDialog(

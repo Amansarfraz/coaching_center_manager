@@ -12,7 +12,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
 
   final TextEditingController searchController = TextEditingController();
 
-  //================ Student List =================//
+  //================ Student Data =================//
 
   List<Map<String, dynamic>> students = [
     {
@@ -20,24 +20,31 @@ class _StudentListScreenState extends State<StudentListScreen> {
       "batch": "Flutter Batch A",
       "phone": "03001234567",
       "status": "Paid",
+      "image": "assets/images/student1.png",
     },
+
     {
       "name": "Ahmad Raza",
       "batch": "Flutter Batch B",
       "phone": "03111234567",
       "status": "Pending",
+      "image": "assets/images/student2.png",
     },
+
     {
       "name": "Sara Khan",
       "batch": "Graphic Batch",
       "phone": "03221234567",
       "status": "Unpaid",
+      "image": "assets/images/student3.png",
     },
+
     {
       "name": "Usman Ali",
       "batch": "Web Batch",
       "phone": "03331234567",
       "status": "Paid",
+      "image": "assets/images/student4.png",
     },
   ];
 
@@ -48,6 +55,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
   @override
   void initState() {
     super.initState();
+
     filteredStudents = List.from(students);
   }
 
@@ -84,7 +92,70 @@ class _StudentListScreenState extends State<StudentListScreen> {
         return Colors.grey;
     }
   }
-  //================ Delete Student =================//
+  //================ Change Profile Picture =================//
+
+  void changeProfilePicture(int index) {
+    List<String> images = [
+      "assets/images/student1.png",
+      "assets/images/student2.png",
+      "assets/images/student3.png",
+      "assets/images/student4.png",
+      "assets/images/student5.png",
+      "assets/images/student6.png",
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Center(
+            child: Text(
+              "Select Profile Picture",
+              style: TextStyle(
+                color: Color(0xff03195D),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          content: SizedBox(
+            width: 300,
+            child: GridView.builder(
+              shrinkWrap: true,
+              itemCount: images.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              itemBuilder: (context, i) {
+                return InkWell(
+                  borderRadius: BorderRadius.circular(50),
+                  onTap: () {
+                    setState(() {
+                      filteredStudents[index]["image"] = images[i];
+                    });
+
+                    Navigator.pop(context);
+                  },
+                  child: CircleAvatar(
+                    radius: 35,
+                    backgroundImage: AssetImage(images[i]),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  //////////////////////////////////////////////////////////
+  // Delete Student
+  //////////////////////////////////////////////////////////
 
   void deleteStudent(int index) {
     showDialog(
@@ -103,7 +174,6 @@ class _StudentListScreenState extends State<StudentListScreen> {
               },
               child: const Text("Cancel"),
             ),
-
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               onPressed: () {
@@ -115,7 +185,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
                 Navigator.pop(context);
 
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Student Deleted Successfully")),
+                  const SnackBar(content: Text("Student deleted successfully")),
                 );
               },
               child: const Text(
@@ -128,19 +198,18 @@ class _StudentListScreenState extends State<StudentListScreen> {
       },
     );
   }
-
   //================ Edit Student =================//
 
   void editStudent(int index) {
-    TextEditingController name = TextEditingController(
+    TextEditingController nameController = TextEditingController(
       text: filteredStudents[index]["name"],
     );
 
-    TextEditingController batch = TextEditingController(
+    TextEditingController batchController = TextEditingController(
       text: filteredStudents[index]["batch"],
     );
 
-    TextEditingController phone = TextEditingController(
+    TextEditingController phoneController = TextEditingController(
       text: filteredStudents[index]["phone"],
     );
 
@@ -156,14 +225,22 @@ class _StudentListScreenState extends State<StudentListScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
 
-              title: const Text("Edit Student"),
+              title: const Center(
+                child: Text(
+                  "Edit Student",
+                  style: TextStyle(
+                    color: Color(0xff03195D),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
 
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
-                      controller: name,
+                      controller: nameController,
                       decoration: const InputDecoration(
                         labelText: "Student Name",
                       ),
@@ -172,16 +249,18 @@ class _StudentListScreenState extends State<StudentListScreen> {
                     const SizedBox(height: 15),
 
                     TextField(
-                      controller: batch,
+                      controller: batchController,
                       decoration: const InputDecoration(labelText: "Batch"),
                     ),
 
                     const SizedBox(height: 15),
 
                     TextField(
-                      controller: phone,
+                      controller: phoneController,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(labelText: "Phone"),
+                      decoration: const InputDecoration(
+                        labelText: "Phone Number",
+                      ),
                     ),
 
                     const SizedBox(height: 15),
@@ -228,9 +307,12 @@ class _StudentListScreenState extends State<StudentListScreen> {
 
                   onPressed: () {
                     setState(() {
-                      filteredStudents[index]["name"] = name.text;
-                      filteredStudents[index]["batch"] = batch.text;
-                      filteredStudents[index]["phone"] = phone.text;
+                      filteredStudents[index]["name"] = nameController.text;
+
+                      filteredStudents[index]["batch"] = batchController.text;
+
+                      filteredStudents[index]["phone"] = phoneController.text;
+
                       filteredStudents[index]["status"] = status;
                     });
 
@@ -256,12 +338,16 @@ class _StudentListScreenState extends State<StudentListScreen> {
     );
   }
 
-  //================ Add Student =================//
+  //////////////////////////////////////////////////////////
+  // Add Student
+  //////////////////////////////////////////////////////////
 
   void addStudent() {
-    TextEditingController name = TextEditingController();
-    TextEditingController batch = TextEditingController();
-    TextEditingController phone = TextEditingController();
+    TextEditingController nameController = TextEditingController();
+
+    TextEditingController batchController = TextEditingController();
+
+    TextEditingController phoneController = TextEditingController();
 
     String status = "Paid";
 
@@ -275,7 +361,15 @@ class _StudentListScreenState extends State<StudentListScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
 
-              title: const Text("Add Student"),
+              title: const Center(
+                child: Text(
+                  "Add Student",
+                  style: TextStyle(
+                    color: Color(0xff03195D),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
 
               content: SingleChildScrollView(
                 child: Column(
@@ -283,7 +377,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
 
                   children: [
                     TextField(
-                      controller: name,
+                      controller: nameController,
                       decoration: const InputDecoration(
                         labelText: "Student Name",
                       ),
@@ -292,16 +386,18 @@ class _StudentListScreenState extends State<StudentListScreen> {
                     const SizedBox(height: 15),
 
                     TextField(
-                      controller: batch,
+                      controller: batchController,
                       decoration: const InputDecoration(labelText: "Batch"),
                     ),
 
                     const SizedBox(height: 15),
 
                     TextField(
-                      controller: phone,
+                      controller: phoneController,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(labelText: "Phone"),
+                      decoration: const InputDecoration(
+                        labelText: "Phone Number",
+                      ),
                     ),
 
                     const SizedBox(height: 15),
@@ -347,12 +443,19 @@ class _StudentListScreenState extends State<StudentListScreen> {
                   ),
 
                   onPressed: () {
+                    if (nameController.text.isEmpty ||
+                        batchController.text.isEmpty ||
+                        phoneController.text.isEmpty) {
+                      return;
+                    }
+
                     setState(() {
                       students.add({
-                        "name": name.text,
-                        "batch": batch.text,
-                        "phone": phone.text,
+                        "name": nameController.text,
+                        "batch": batchController.text,
+                        "phone": phoneController.text,
                         "status": status,
+                        "image": "assets/images/default.png",
                       });
 
                       filteredStudents = List.from(students);
@@ -379,12 +482,11 @@ class _StudentListScreenState extends State<StudentListScreen> {
       },
     );
   }
-  //================ Build Method =================//
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff86BFE2),
+      backgroundColor: const Color(0xFFC3DFF0),
 
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xff03195D),
@@ -397,336 +499,223 @@ class _StudentListScreenState extends State<StudentListScreen> {
       ),
 
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            ///================ BLUE HEADER ================///
+            ///================ HEADER ================
             Container(
-              height: 180,
               width: double.infinity,
+              height: 77,
               color: const Color(0xff86BFE2),
-            ),
 
-            ///================ WHITE CONTAINER ================///
-            Positioned(
-              top: 120,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xffF8F9FD),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(35),
-                    topRight: Radius.circular(35),
-                  ),
-                ),
-              ),
-            ),
-
-            ///================ CONTENT ================///
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-
-              child: Column(
+              child: Row(
                 children: [
-                  const SizedBox(height: 18),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Color(0xff03195D),
+                    ),
+                  ),
 
-                  ///================ HEADER =================///
-                  Row(
-                    children: [
-                      InkWell(
-                        borderRadius: BorderRadius.circular(50),
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          height: 45,
-                          width: 45,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new,
-                            color: Color(0xff03195D),
-                            size: 18,
-                          ),
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      const Text(
+                  const Expanded(
+                    child: Center(
+                      child: Text(
                         "Student List",
                         style: TextStyle(
-                          fontSize: 26,
+                          fontSize: 25,
                           fontWeight: FontWeight.bold,
                           color: Color(0xff03195D),
                         ),
                       ),
-
-                      const Spacer(),
-
-                      const SizedBox(width: 45),
-                    ],
+                    ),
                   ),
 
-                  const SizedBox(height: 35),
+                  const SizedBox(width: 48),
+                ],
+              ),
+            ),
 
-                  ///================ SEARCH =================///
-                  Container(
-                    height: 58,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(.08),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(18),
 
-                    child: TextField(
-                      controller: searchController,
-                      onChanged: searchStudent,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Color(0xff03195D),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 55,
+
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(.08),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+
+                      child: TextField(
+                        controller: searchController,
+
+                        onChanged: searchStudent,
+
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: Color(0xff03195D),
+                          ),
+
+                          hintText: "Search Student",
                         ),
-                        hintText: "Search Student",
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 25),
+                    const SizedBox(height: 20),
 
-                  ///================ LIST =================///
-                  Expanded(
-                    child: filteredStudents.isEmpty
-                        ? const Center(
-                            child: Text(
-                              "No Student Found",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.only(bottom: 90),
-                            itemCount: filteredStudents.length,
-                            itemBuilder: (context, index) {
-                              final student = filteredStudents[index];
+                    Expanded(
+                      child: filteredStudents.isEmpty
+                          ? const Center(child: Text("No Student Found"))
+                          : ListView.builder(
+                              itemCount: filteredStudents.length,
 
-                              // 👇 YAHAN NEXT PART KA STUDENT CARD AYEGA
+                              itemBuilder: (context, index) {
+                                final student = filteredStudents[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 18),
+                                  padding: const EdgeInsets.all(15),
 
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 18),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(22),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(.08),
-                                      blurRadius: 15,
-                                      offset: const Offset(0, 5),
-                                    ),
-                                  ],
-                                ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(.15),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
 
-                                child: Column(
-                                  children: [
-                                    ///================ TOP ROW =================///
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        /// Avatar
-                                        CircleAvatar(
-                                          radius: 32,
-                                          backgroundColor: const Color(
-                                            0xffD8ECFF,
-                                          ),
-                                          child: Text(
-                                            student["name"][0],
-                                            style: const TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xff03195D),
+                                  child: Column(
+                                    children: [
+                                      /// TOP ROW
+                                      Row(
+                                        children: [
+                                          InkWell(
+                                            onTap: () {
+                                              changeProfilePicture(index);
+                                            },
+                                            child: CircleAvatar(
+                                              radius: 32,
+                                              backgroundImage: AssetImage(
+                                                student["image"],
+                                              ),
                                             ),
                                           ),
-                                        ),
 
-                                        const SizedBox(width: 15),
+                                          const SizedBox(width: 15),
 
-                                        /// Details
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                student["name"],
-                                                style: const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color(0xff03195D),
-                                                ),
-                                              ),
-
-                                              const SizedBox(height: 8),
-
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 5,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.blue.shade50,
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                ),
-                                                child: Text(
-                                                  student["batch"],
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  student["name"],
                                                   style: const TextStyle(
-                                                    color: Color(0xff1565C0),
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 12,
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color(0xff03195D),
                                                   ),
                                                 ),
-                                              ),
 
-                                              const SizedBox(height: 10),
+                                                const SizedBox(height: 6),
 
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.phone_android,
-                                                    color: Colors.grey,
-                                                    size: 18,
-                                                  ),
+                                                Text(student["batch"]),
 
-                                                  const SizedBox(width: 6),
+                                                const SizedBox(height: 6),
 
-                                                  Expanded(
-                                                    child: Text(
-                                                      student["phone"],
-                                                      style: const TextStyle(
-                                                        fontSize: 14,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
+                                                Text(student["phone"]),
+                                              ],
+                                            ),
                                           ),
-                                        ),
 
-                                        /// Status Badge
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 14,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: getStatusColor(
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: getStatusColor(
+                                                student["status"],
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
                                               student["status"],
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            student["status"],
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    const SizedBox(height: 18),
-
-                                    Divider(color: Colors.grey.shade300),
-
-                                    const SizedBox(height: 12),
-
-                                    ///================ BUTTONS =================///
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: ElevatedButton.icon(
-                                            onPressed: () {
-                                              editStudent(index);
-                                            },
-
-                                            icon: const Icon(Icons.edit),
-
-                                            label: const Text("Edit"),
-
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.blue.shade50,
-                                              foregroundColor: Colors.blue,
-                                              elevation: 0,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(14),
-                                              ),
-                                              minimumSize: const Size(
-                                                double.infinity,
-                                                48,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                           ),
-                                        ),
+                                        ],
+                                      ),
 
-                                        const SizedBox(width: 12),
+                                      const SizedBox(height: 15),
 
-                                        Expanded(
-                                          child: ElevatedButton.icon(
-                                            onPressed: () {
-                                              deleteStudent(index);
-                                            },
-
-                                            icon: const Icon(Icons.delete),
-
-                                            label: const Text("Delete"),
-
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.red.shade50,
-                                              foregroundColor: Colors.red,
-                                              elevation: 0,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(14),
-                                              ),
-                                              minimumSize: const Size(
-                                                double.infinity,
-                                                48,
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: ElevatedButton.icon(
+                                              onPressed: () {
+                                                editStudent(index);
+                                              },
+                                              icon: const Icon(Icons.edit),
+                                              label: const Text("Edit"),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.blue.shade50,
+                                                foregroundColor: Colors.blue,
+                                                elevation: 0,
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                  ),
-                ],
+
+                                          const SizedBox(width: 10),
+
+                                          Expanded(
+                                            child: ElevatedButton.icon(
+                                              onPressed: () {
+                                                deleteStudent(index);
+                                              },
+                                              icon: const Icon(Icons.delete),
+                                              label: const Text("Delete"),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.red.shade50,
+                                                foregroundColor: Colors.red,
+                                                elevation: 0,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

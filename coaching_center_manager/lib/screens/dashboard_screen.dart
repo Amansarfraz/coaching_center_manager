@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'student_list_screen.dart';
+import 'teacher_list_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -524,7 +525,14 @@ class DashboardScreen extends StatelessWidget {
                   "Teachers",
                   Icons.school_rounded,
                   const Color(0xff56CC9D),
-                  () {},
+                  () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TeacherListScreen(),
+                      ),
+                    );
+                  },
                 ),
 
                 quickAction(

@@ -50,13 +50,14 @@ dependencies:
   image_picker: ^1.2.0
 
   # Local Storage
-  shared_preferences: ^2.5.3
+  shared_preferences: ^2.5.5
 
   # Toast Messages
   fluttertoast: ^8.2.12
 
   # Loading Animations
   lottie: ^3.3.2
+  dio: ^5.11.0
 
 dev_dependencies:
   flutter_test:

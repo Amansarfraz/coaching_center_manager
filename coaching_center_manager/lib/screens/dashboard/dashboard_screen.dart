@@ -43,9 +43,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF8CC2E8),
         elevation: 0,
-        title: const Text(
-          'Admin Dashboard',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+        title: Text(
+          '${widget.role} Dashboard',
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
         ),
       ),
       body: RefreshIndicator(
@@ -154,115 +154,112 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               const SizedBox(height: 16),
 
-              // Stats Cards
-              _statCard(
-                icon: Icons.people_alt_outlined,
-                title: 'Total Students',
-                value: totalStudents.toString(),
-                subtitle: 'Active: $totalStudents   New: 0 this month',
-                color: const Color(0xFF2F80ED),
-              ),
-              const SizedBox(height: 12),
-              _statCard(
-                icon: Icons.school_outlined,
-                title: 'Total Teachers',
-                value: totalTeachers.toString(),
-                subtitle: 'Full-time: $totalTeachers   part-time: 0',
-                color: const Color(0xFFF2994A),
-              ),
-              const SizedBox(height: 12),
-              _statCard(
-                icon: Icons.book_outlined,
-                title: 'Total Batches',
-                value: totalBatches.toString(),
-                subtitle: 'Morning & Evening batches',
-                color: const Color(0xFF27AE60),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Attendance & Fee row
-              Row(
-                children: [
-                  Expanded(
-                    child: _miniCard(
-                      title: "Today's Attendance",
-                      value: totalStudents == 0 ? '0%' : '92%',
-                      subtitle: 'Present 550   Absent 200',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _miniCard(
-                      title: 'Monthly Fee collection',
-                      value: '\$120,500',
-                      subtitle: 'Target \$140,000   Paid: 86%',
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Recent Activity
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+              // Stats Cards — sirf Admin ko full stats dikhein
+              if (widget.role.toLowerCase() == 'admin') ...[
+                _statCard(
+                  icon: Icons.people_alt_outlined,
+                  title: 'Total Students',
+                  value: totalStudents.toString(),
+                  subtitle: 'Active: $totalStudents   New: 0 this month',
+                  color: const Color(0xFF2F80ED),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 12),
+                _statCard(
+                  icon: Icons.school_outlined,
+                  title: 'Total Teachers',
+                  value: totalTeachers.toString(),
+                  subtitle: 'Full-time: $totalTeachers   part-time: 0',
+                  color: const Color(0xFFF2994A),
+                ),
+                const SizedBox(height: 12),
+                _statCard(
+                  icon: Icons.book_outlined,
+                  title: 'Total Batches',
+                  value: totalBatches.toString(),
+                  subtitle: 'Morning & Evening batches',
+                  color: const Color(0xFF27AE60),
+                ),
+                const SizedBox(height: 20),
+
+                Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Recent Activity',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
-                        ),
-                        Text(
-                          'Detailed Chart',
-                          style: TextStyle(
-                            color: Colors.blue.shade700,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+                    Expanded(
+                      child: _miniCard(
+                        title: "Today's Attendance",
+                        value: totalStudents == 0 ? '0%' : '92%',
+                        subtitle: 'Present 550   Absent 200',
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    _activityTile(
-                      Icons.person_add_alt,
-                      'New Student',
-                      'Ayesha Khan joined class 9A',
-                    ),
-                    _activityTile(
-                      Icons.badge_outlined,
-                      'Teacher Profile Update',
-                      'Mr. Ahmed',
-                    ),
-                    _activityTile(
-                      Icons.groups_outlined,
-                      'Batch 12',
-                      'Timetable Modified',
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _miniCard(
+                        title: 'Monthly Fee collection',
+                        value: '\$120,500',
+                        subtitle: 'Target \$140,000   Paid: 86%',
+                      ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 20),
 
-              const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Recent Activity',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
+                          Text(
+                            'Detailed Chart',
+                            style: TextStyle(
+                              color: Colors.blue.shade700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _activityTile(
+                        Icons.person_add_alt,
+                        'New Student',
+                        'Ayesha Khan joined class 9A',
+                      ),
+                      _activityTile(
+                        Icons.badge_outlined,
+                        'Teacher Profile Update',
+                        'Mr. Ahmed',
+                      ),
+                      _activityTile(
+                        Icons.groups_outlined,
+                        'Batch 12',
+                        'Timetable Modified',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
 
-              // Quick Actions
+              // Quick Actions — role ke hisab se
               const Text(
                 'Quick Actions',
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
@@ -275,38 +272,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 childAspectRatio: 2.4,
-                children: [
-                  _quickAction(Icons.person_add_outlined, 'Add Student', () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const StudentListScreen(),
-                      ),
-                    );
-                  }),
-                  _quickAction(
-                    Icons.person_add_alt_1_outlined,
-                    'Add Teacher',
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const TeacherListScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _quickAction(Icons.groups_2_outlined, 'Create Batch', () {}),
-                  _quickAction(Icons.settings_outlined, 'Setting', () {
-                    Navigator.pushNamed(context, '/settings_screen');
-                  }),
-                  _quickAction(
-                    Icons.check_circle_outline,
-                    'Record Attendance',
-                    () {},
-                  ),
-                  _quickAction(Icons.receipt_long_outlined, 'View Fees', () {}),
-                ],
+                children: _buildQuickActions(context),
               ),
 
               const SizedBox(height: 20),
@@ -315,6 +281,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+
+  // ---------------- ROLE-BASED QUICK ACTIONS ----------------
+  List<Widget> _buildQuickActions(BuildContext context) {
+    final role = widget.role.toLowerCase();
+
+    if (role == 'admin') {
+      return [
+        _quickAction(Icons.person_add_outlined, 'Add Student', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const StudentListScreen()),
+          );
+        }),
+        _quickAction(Icons.person_add_alt_1_outlined, 'Add Teacher', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const TeacherListScreen()),
+          );
+        }),
+        _quickAction(Icons.groups_2_outlined, 'Create Batch', () {}),
+        _quickAction(Icons.settings_outlined, 'Setting', () {
+          Navigator.pushNamed(context, '/settings_screen');
+        }),
+        _quickAction(Icons.check_circle_outline, 'Record Attendance', () {}),
+        _quickAction(Icons.receipt_long_outlined, 'View Fees', () {}),
+      ];
+    } else if (role == 'teacher') {
+      return [
+        _quickAction(Icons.groups_2_outlined, 'My Batches', () {}),
+        _quickAction(Icons.check_circle_outline, 'Record Attendance', () {}),
+        _quickAction(Icons.people_alt_outlined, 'My Students', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const StudentListScreen()),
+          );
+        }),
+        _quickAction(Icons.settings_outlined, 'Setting', () {
+          Navigator.pushNamed(context, '/settings_screen');
+        }),
+      ];
+    } else {
+      // student
+      return [
+        _quickAction(Icons.check_circle_outline, 'My Attendance', () {}),
+        _quickAction(Icons.receipt_long_outlined, 'My Fees', () {}),
+        _quickAction(Icons.groups_2_outlined, 'My Batch', () {}),
+        _quickAction(Icons.settings_outlined, 'Setting', () {
+          Navigator.pushNamed(context, '/settings_screen');
+        }),
+      ];
+    }
   }
 
   Widget _statCard({

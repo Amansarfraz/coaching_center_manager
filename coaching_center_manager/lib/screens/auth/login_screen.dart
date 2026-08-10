@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../dashboard/dashboard_screen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +17,9 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   String _selectedRole = 'Student'; // Student, Teacher, Admin
 
+  // Simple, correct email regex: kuch@kuch.kuch (min 2 letters after dot)
+  final RegExp _emailRegex = RegExp(r'^[\w\.\-]+@[\w\-]+\.[a-zA-Z]{2,}$');
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -23,24 +27,29 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    // TEMPORARY: Backend abhi ready nahi hai, isliye seedha Dashboard pe
-    // navigate kar rahe hain testing ke liye. Jab backend ban jaye,
-    // neeche wala commented code wapas enable kar dena aur ye line hata dena.
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => DashboardScreen(role: _selectedRole)),
-    );
-    return;
+  String? _validateEmail(String email) {
+    if (email.isEmpty) return 'Email is required';
+    if (!email.contains('@')) return 'Email must contain @';
+    if (!_emailRegex.hasMatch(email))
+      return 'Enter a valid email (e.g. name@example.com)';
+    return null;
+  }
 
-    // ignore: dead_code
-    /*
+  Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    final emailError = _validateEmail(email);
+    if (emailError != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(emailError)));
+      return;
+    }
+
+    if (password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password')),
+        const SnackBar(content: Text('Please enter your password')),
       );
       return;
     }
@@ -51,16 +60,18 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
+      // Backend se aaya asal role use karo (Login form ka selected role sirf UI hint hai)
+      final actualRole = authProvider.userRole ?? _selectedRole.toLowerCase();
+
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => DashboardScreen(role: _selectedRole)),
+        MaterialPageRoute(builder: (_) => DashboardScreen(role: actualRole)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(authProvider.errorMessage ?? 'Login failed')),
       );
     }
-    */
   }
 
   Widget _roleButton(String role) {
@@ -101,9 +112,27 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: [
               const SizedBox(height: 10),
-              Image.asset('assets/images/logo.png', width: 300, height: 300),
+              Image.asset('assets/images/logo.png', width: 110, height: 110),
+              const SizedBox(height: 8),
+              const Text(
+                'COACHING CENTER',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF16305C),
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                '— MANAGER —',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFF2994A),
+                  letterSpacing: 2,
+                ),
+              ),
 
-              //const SizedBox(height: 8),
               const SizedBox(height: 24),
 
               const Text(
@@ -192,11 +221,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: ElevatedButton(
                   onPressed: authProvider.isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0x86BFE2),
+                    backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF16305C),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
+                    elevation: 0,
                   ),
                   child: authProvider.isLoading
                       ? const SizedBox(
@@ -212,9 +242,38 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
+                            color: Color(0xFF16305C),
                           ),
                         ),
                 ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Don't have an account?",
+                    style: TextStyle(color: Color(0xFF16305C), fontSize: 13),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SignupScreen()),
+                      );
+                    },
+                    child: const Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        color: Color(0xFFF2994A),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

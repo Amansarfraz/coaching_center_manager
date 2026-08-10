@@ -151,27 +151,8 @@ class _SignupScreenState extends State<SignupScreen> {
           child: Column(
             children: [
               const SizedBox(height: 10),
-              Image.asset('assets/images/logo.png', width: 90, height: 90),
+              Image.asset('assets/images/logo.png', width: 150, height: 150),
               const SizedBox(height: 8),
-              const Text(
-                'COACHING CENTER',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF16305C),
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                '— MANAGER —',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFF2994A),
-                  letterSpacing: 2,
-                ),
-              ),
-
               const SizedBox(height: 20),
 
               const Text(

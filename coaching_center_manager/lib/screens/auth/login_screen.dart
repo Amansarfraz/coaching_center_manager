@@ -114,24 +114,6 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 10),
               Image.asset('assets/images/logo.png', width: 110, height: 110),
               const SizedBox(height: 8),
-              const Text(
-                'COACHING CENTER',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF16305C),
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                '— MANAGER —',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFFF2994A),
-                  letterSpacing: 2,
-                ),
-              ),
 
               const SizedBox(height: 24),
 

@@ -2,9 +2,10 @@ import 'package:dio/dio.dart';
 import 'local_storage_service.dart';
 
 class ApiService {
-  // Android Emulator ke liye localhost = 10.0.2.2
-  // Real phone pe test karne ke liye apne laptop ka local IP daalna (jaise http://192.168.1.5:8000)
-  static const String baseUrl = "http://10.0.2.2:8000/api";
+  // Chrome/Web ke liye: 127.0.0.1
+  // Android Emulator ke liye: 10.0.2.2
+  // Real phone ke liye: apne laptop ka local IP (jaise 192.168.1.5)
+  static const String baseUrl = "http://127.0.0.1:8000/api";
 
   late Dio dio;
 
@@ -28,7 +29,6 @@ class ApiService {
           return handler.next(options);
         },
         onError: (DioException e, handler) {
-          // Yahan future mein global error handling / logout on 401 add karenge
           return handler.next(e);
         },
       ),

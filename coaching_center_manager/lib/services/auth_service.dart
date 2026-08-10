@@ -6,43 +6,7 @@ import 'local_storage_service.dart';
 class AuthService {
   final ApiService _apiService = ApiService();
 
-  // ---------------- LOGIN ----------------
-  Future<Map<String, dynamic>> login({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      final response = await _apiService.dio.post(
-        '/auth/login',
-        data: {'email': email, 'password': password},
-      );
-
-      final data = response.data;
-      final token = data['access_token'];
-      final userJson = data['user'];
-
-      final user = UserModel.fromJson(userJson);
-
-      // Save session locally
-      await LocalStorageService.saveToken(token);
-      await LocalStorageService.saveUserSession(
-        userId: user.id,
-        userName: user.fullName,
-        role: user.role,
-      );
-
-      return {'success': true, 'user': user};
-    } on DioException catch (e) {
-      return {'success': false, 'message': _handleError(e)};
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'Something went wrong. Please try again.',
-      };
-    }
-  }
-
-  // ---------------- SIGNUP (Admin creates account) ----------------
+  // ---------------- SIGNUP ----------------
   Future<Map<String, dynamic>> signup({
     required String fullName,
     required String email,
@@ -76,6 +40,42 @@ class AuthService {
     }
   }
 
+  // ---------------- LOGIN ----------------
+  Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _apiService.dio.post(
+        '/auth/login',
+        data: {'email': email, 'password': password},
+      );
+
+      final data = response.data;
+      final token = data['access_token'];
+      final userJson = data['user'];
+
+      final user = UserModel.fromJson(userJson);
+
+      // Session locally save karo
+      await LocalStorageService.saveToken(token);
+      await LocalStorageService.saveUserSession(
+        userId: user.id,
+        userName: user.fullName,
+        role: user.role,
+      );
+
+      return {'success': true, 'user': user};
+    } on DioException catch (e) {
+      return {'success': false, 'message': _handleError(e)};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Something went wrong. Please try again.',
+      };
+    }
+  }
+
   // ---------------- LOGOUT ----------------
   Future<void> logout() async {
     await LocalStorageService.clearSession();
@@ -83,19 +83,32 @@ class AuthService {
 
   // ---------------- ERROR HANDLER ----------------
   String _handleError(DioException e) {
+    // Backend se aaya specific error message
     if (e.response != null && e.response?.data != null) {
       final data = e.response!.data;
       if (data is Map && data.containsKey('detail')) {
-        return data['detail'].toString();
+        final detail = data['detail'];
+        if (detail is String) return detail;
+        if (detail is List && detail.isNotEmpty) {
+          // FastAPI validation errors (422) list format mein aate hain
+          final firstError = detail[0];
+          if (firstError is Map && firstError.containsKey('msg')) {
+            return firstError['msg'].toString();
+          }
+        }
       }
     }
+
+    // Network-level errors
     if (e.type == DioExceptionType.connectionTimeout ||
-        e.type == DioExceptionType.receiveTimeout) {
-      return 'Connection timeout. Please check your internet.';
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      return 'Connection timeout. Please check if the server is running.';
     }
     if (e.type == DioExceptionType.connectionError) {
-      return 'Could not connect to server. Please check your network.';
+      return 'Could not connect to server. Please check your network or server status.';
     }
-    return 'Login failed. Please check your credentials.';
+
+    return 'Something went wrong. Please try again.';
   }
 }

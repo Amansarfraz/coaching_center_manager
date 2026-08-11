@@ -177,7 +177,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
     final studentProvider = Provider.of<StudentProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 171, 208, 231),
       appBar: AppBar(
         backgroundColor: const Color(0xFF8CC2E8),
         elevation: 0,
@@ -397,7 +397,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                         _isEditMode ? 'Update Student' : 'Save Student',
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2F80ED),
+                        backgroundColor: const Color(0xFFC3DFF0),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(

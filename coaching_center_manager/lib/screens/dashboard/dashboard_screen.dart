@@ -39,245 +39,244 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final totalBatches = batchProvider.batches.length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FF),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF8CC2E8),
-        elevation: 0,
-        title: Text(
-          '${widget.role} Dashboard',
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
-        ),
-      ),
+      backgroundColor: const Color(
+        0xFFE8F3FB,
+      ), // halka background (86BFE2 se lighter)
       body: RefreshIndicator(
         onRefresh: () async {
           await studentProvider.fetchStudents();
           await teacherProvider.fetchTeachers();
           await batchProvider.fetchBatches();
         },
-        child: SingleChildScrollView(
+        child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome card with search
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+          slivers: [
+            // Header (86BFE2 background, black text)
+            SliverToBoxAdapter(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 50, 20, 24),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF86BFE2),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(28),
+                    bottomRight: Radius.circular(28),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${widget.role} Dashboard',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.notifications_none,
+                                color: Colors.black,
+                              ),
+                              onPressed: () {},
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.settings_outlined,
+                                color: Colors.black,
+                              ),
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/settings_screen',
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
                     Text(
                       'Welcome Back, $userName!',
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF16305C),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF5F8FF),
-                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
                       child: const TextField(
                         decoration: InputDecoration(
                           hintText: 'Search',
-                          prefixIcon: Icon(Icons.search, size: 20),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            size: 20,
+                            color: Colors.black54,
+                          ),
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: EdgeInsets.symmetric(vertical: 14),
                         ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Body content
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  // Stats Cards — sirf Admin ko
+                  if (widget.role.toLowerCase() == 'admin') ...[
+                    _statCard(
+                      icon: Icons.people_alt_outlined,
+                      title: 'Total Students',
+                      value: totalStudents.toString(),
+                      subtitle: 'Active: $totalStudents   New: 0 this month',
+                      color: const Color(0xFF2F80ED),
+                    ),
                     const SizedBox(height: 12),
+                    _statCard(
+                      icon: Icons.school_outlined,
+                      title: 'Total Teachers',
+                      value: totalTeachers.toString(),
+                      subtitle: 'Full-time: $totalTeachers   part-time: 0',
+                      color: const Color(0xFFF2994A),
+                    ),
+                    const SizedBox(height: 12),
+                    _statCard(
+                      icon: Icons.book_outlined,
+                      title: 'Total Batches',
+                      value: totalBatches.toString(),
+                      subtitle: 'Morning & Evening batches',
+                      color: const Color(0xFF27AE60),
+                    ),
+                    const SizedBox(height: 20),
+
                     Row(
                       children: [
-                        const CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Color(0xFFE3EEFB),
-                          child: Icon(Icons.person, color: Color(0xFF16305C)),
-                        ),
-                        const SizedBox(width: 10),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: _miniCard(
+                            title: "Today's Attendance",
+                            value: totalStudents == 0 ? '0%' : '92%',
+                            subtitle: 'Present 550   Absent 200',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _miniCard(
+                            title: 'Monthly Fee collection',
+                            value: '\$120,500',
+                            subtitle: 'Target \$140,000   Paid: 86%',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                widget.role,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                              const Text(
+                                'Recent Activity',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
                                 ),
                               ),
                               Text(
-                                userName,
-                                style: const TextStyle(
+                                'Detailed Chart',
+                                style: TextStyle(
+                                  color: Colors.blue.shade700,
                                   fontSize: 12,
-                                  color: Colors.grey,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.notifications_none,
-                            color: Color(0xFF16305C),
+                          const SizedBox(height: 12),
+                          _activityTile(
+                            Icons.person_add_alt,
+                            'New Student',
+                            'Ayesha Khan joined class 9A',
                           ),
-                          onPressed: () {},
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.settings_outlined,
-                            color: Color(0xFF16305C),
+                          _activityTile(
+                            Icons.badge_outlined,
+                            'Teacher Profile Update',
+                            'Mr. Ahmed',
                           ),
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/settings_screen');
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Stats Cards — sirf Admin ko full stats dikhein
-              if (widget.role.toLowerCase() == 'admin') ...[
-                _statCard(
-                  icon: Icons.people_alt_outlined,
-                  title: 'Total Students',
-                  value: totalStudents.toString(),
-                  subtitle: 'Active: $totalStudents   New: 0 this month',
-                  color: const Color(0xFF2F80ED),
-                ),
-                const SizedBox(height: 12),
-                _statCard(
-                  icon: Icons.school_outlined,
-                  title: 'Total Teachers',
-                  value: totalTeachers.toString(),
-                  subtitle: 'Full-time: $totalTeachers   part-time: 0',
-                  color: const Color(0xFFF2994A),
-                ),
-                const SizedBox(height: 12),
-                _statCard(
-                  icon: Icons.book_outlined,
-                  title: 'Total Batches',
-                  value: totalBatches.toString(),
-                  subtitle: 'Morning & Evening batches',
-                  color: const Color(0xFF27AE60),
-                ),
-                const SizedBox(height: 20),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: _miniCard(
-                        title: "Today's Attendance",
-                        value: totalStudents == 0 ? '0%' : '92%',
-                        subtitle: 'Present 550   Absent 200',
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _miniCard(
-                        title: 'Monthly Fee collection',
-                        value: '\$120,500',
-                        subtitle: 'Target \$140,000   Paid: 86%',
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Recent Activity',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                            ),
-                          ),
-                          Text(
-                            'Detailed Chart',
-                            style: TextStyle(
-                              color: Colors.blue.shade700,
-                              fontSize: 12,
-                            ),
+                          _activityTile(
+                            Icons.groups_outlined,
+                            'Batch 12',
+                            'Timetable Modified',
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      _activityTile(
-                        Icons.person_add_alt,
-                        'New Student',
-                        'Ayesha Khan joined class 9A',
-                      ),
-                      _activityTile(
-                        Icons.badge_outlined,
-                        'Teacher Profile Update',
-                        'Mr. Ahmed',
-                      ),
-                      _activityTile(
-                        Icons.groups_outlined,
-                        'Batch 12',
-                        'Timetable Modified',
-                      ),
-                    ],
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // Quick Actions
+                  const Text(
+                    'Quick Actions',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 12),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 2.4,
+                    children: _buildQuickActions(context),
+                  ),
 
-              // Quick Actions — role ke hisab se
-              const Text(
-                'Quick Actions',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                  const SizedBox(height: 20),
+                ]),
               ),
-              const SizedBox(height: 12),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 2.4,
-                children: _buildQuickActions(context),
-              ),
-
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -323,7 +322,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }),
       ];
     } else {
-      // student
       return [
         _quickAction(Icons.check_circle_outline, 'My Attendance', () {}),
         _quickAction(Icons.receipt_long_outlined, 'My Fees', () {}),
@@ -346,7 +344,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -404,7 +402,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -443,7 +441,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundColor: const Color(0xFFE3EEFB),
+            backgroundColor: const Color.fromARGB(255, 171, 208, 231),
             child: Icon(icon, size: 16, color: const Color(0xFF16305C)),
           ),
           const SizedBox(width: 10),
@@ -473,11 +471,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _quickAction(IconData icon, String label, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF16305C),
-          borderRadius: BorderRadius.circular(14),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF2F80ED), Color(0xFF16305C)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(

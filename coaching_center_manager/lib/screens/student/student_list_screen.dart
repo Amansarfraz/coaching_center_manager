@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
 import '../../models/student_model.dart';
 import 'student_add_screen.dart';
+import 'student_details_screen.dart';
 
 class StudentListScreen extends StatefulWidget {
   const StudentListScreen({super.key});
@@ -34,96 +35,104 @@ class _StudentListScreenState extends State<StudentListScreen> {
     final students = studentProvider.students;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF8CC2E8),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF8CC2E8),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF16305C)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Student List',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: Color(0xFF16305C),
-          ),
-        ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFFF5F8FF),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-        ),
-        child: Column(
-          children: [
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
+      backgroundColor: const Color(0xFFE8F3FB),
+      body: Column(
+        children: [
+          // Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+            decoration: const BoxDecoration(
+              color: Color(0xFF86BFE2),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
+              ),
+            ),
+            child: Row(
+              children: [
+                InkWell(
+                  onTap: () => Navigator.pop(context),
                   borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                  child: const CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: Colors.black,
+                      size: 18,
                     ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (value) {
-                    studentProvider.searchStudents(value);
-                  },
-                  decoration: const InputDecoration(
-                    hintText: 'Search students by name, batch or ID...',
-                    hintStyle: TextStyle(fontSize: 13),
-                    prefixIcon: Icon(Icons.search, size: 20),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 14),
                   ),
+                ),
+                const SizedBox(width: 14),
+                const Text(
+                  'Student List',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 20,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) => studentProvider.searchStudents(value),
+                decoration: const InputDecoration(
+                  hintText: 'Search students by name, batch or ID...',
+                  hintStyle: TextStyle(fontSize: 13),
+                  prefixIcon: Icon(Icons.search, size: 20),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
+          ),
 
-            // List
-            Expanded(
-              child: studentProvider.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : students.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No students found',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: () => studentProvider.fetchStudents(),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: students.length,
-                        itemBuilder: (context, index) {
-                          final student = students[index];
-                          return _studentCard(
-                            context,
-                            student,
-                            studentProvider,
-                          );
-                        },
-                      ),
+          // List
+          Expanded(
+            child: studentProvider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : students.isEmpty
+                ? const Center(
+                    child: Text(
+                      'No students found',
+                      style: TextStyle(color: Colors.grey),
                     ),
-            ),
-          ],
-        ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () => studentProvider.fetchStudents(),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: students.length,
+                      itemBuilder: (context, index) {
+                        final student = students[index];
+                        return _studentCard(context, student, studentProvider);
+                      },
+                    ),
+                  ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF2F80ED),
+        backgroundColor: const Color(0xFF16305C),
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text(
           'Add Student',
@@ -143,7 +152,6 @@ class _StudentListScreenState extends State<StudentListScreen> {
     Color bgColor;
     Color textColor;
     String label;
-
     switch (status) {
       case 'active':
         bgColor = const Color(0xFFE7F8EE);
@@ -160,7 +168,6 @@ class _StudentListScreenState extends State<StudentListScreen> {
         textColor = const Color(0xFFF2994A);
         label = 'Unpaid';
     }
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
@@ -242,7 +249,14 @@ class _StudentListScreenState extends State<StudentListScreen> {
                   size: 20,
                   color: Color(0xFF16305C),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => StudentDetailsScreen(student: student),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -267,7 +281,15 @@ class _StudentListScreenState extends State<StudentListScreen> {
                   _iconButton(
                     Icons.visibility_outlined,
                     const Color(0xFF2F80ED),
-                    () {},
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              StudentDetailsScreen(student: student),
+                        ),
+                      );
+                    },
                   ),
                   _iconButton(Icons.edit_outlined, const Color(0xFFF2994A), () {
                     Navigator.push(
@@ -284,11 +306,6 @@ class _StudentListScreenState extends State<StudentListScreen> {
                     () {
                       _confirmDelete(context, student, provider);
                     },
-                  ),
-                  _iconButton(
-                    Icons.chat_bubble_outline,
-                    const Color(0xFF16305C),
-                    () {},
                   ),
                 ],
               ),

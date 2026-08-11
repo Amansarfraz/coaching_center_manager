@@ -21,12 +21,12 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
   final _monthlyFeeController = TextEditingController();
+  final _batchNameController =
+      TextEditingController(); // TEMPORARY - Batch module ban jaye to hata dena
 
   String? _selectedGender;
   DateTime? _dob;
   DateTime? _admissionDate;
-  String? _selectedBatchId;
-  String? _selectedBatchName;
 
   bool get _isEditMode => widget.studentToEdit != null;
 
@@ -46,11 +46,10 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       _emailController.text = s.email;
       _addressController.text = s.homeAddress;
       _monthlyFeeController.text = s.monthlyFee.toString();
+      _batchNameController.text = s.batchName;
       _selectedGender = s.gender;
       _dob = s.dob;
       _admissionDate = s.admissionDate;
-      _selectedBatchId = s.batchId;
-      _selectedBatchName = s.batchName;
     }
   }
 
@@ -62,6 +61,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
     _emailController.dispose();
     _addressController.dispose();
     _monthlyFeeController.dispose();
+    _batchNameController.dispose();
     super.dispose();
   }
 
@@ -91,10 +91,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
   Future<void> _saveStudent() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_selectedGender == null ||
-        _dob == null ||
-        _admissionDate == null ||
-        _selectedBatchId == null) {
+    if (_selectedGender == null || _dob == null || _admissionDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required fields')),
       );
@@ -106,6 +103,8 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       listen: false,
     );
 
+    final batchNameValue = _batchNameController.text.trim();
+
     final data = {
       'full_name': _fullNameController.text.trim(),
       'father_name': _fatherNameController.text.trim(),
@@ -115,8 +114,9 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       'gender': _selectedGender,
       'dob': _dob!.toIso8601String(),
       'admission_date': _admissionDate!.toIso8601String(),
-      'batch_id': _selectedBatchId,
-      'batch_name': _selectedBatchName,
+      'batch_id':
+          batchNameValue, // TEMPORARY - jab tak Batch module nahi banta, batch_name ko hi id ki tarah use kar rahe hain
+      'batch_name': batchNameValue,
       'monthly_fee': double.tryParse(_monthlyFeeController.text.trim()) ?? 0,
     };
 
@@ -148,7 +148,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       hintText: hint,
       hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
       filled: true,
-      fillColor: const Color(0xFFEFEFEF),
+      fillColor: Colors.white,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
@@ -173,263 +173,265 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final batchProvider = Provider.of<BatchProvider>(context);
     final studentProvider = Provider.of<StudentProvider>(context);
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 171, 208, 231),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF8CC2E8),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF16305C)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          _isEditMode ? 'Edit Student' : 'Add New Student',
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: Color(0xFF16305C),
+      backgroundColor: const Color(0xFFE8F3FB),
+      body: Column(
+        children: [
+          // Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+            decoration: const BoxDecoration(
+              color: Color(0xFF86BFE2),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
+              ),
+            ),
+            child: Row(
+              children: [
+                InkWell(
+                  onTap: () => Navigator.pop(context),
+                  borderRadius: BorderRadius.circular(30),
+                  child: const CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: Colors.black,
+                      size: 18,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  _isEditMode ? 'Edit Student' : 'Add New Student',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 20,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _label('Full Name:'),
-              TextFormField(
-                controller: _fullNameController,
-                decoration: _fieldDecoration('Enter full name'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
 
-              _label("Father's Name:"),
-              TextFormField(
-                controller: _fatherNameController,
-                decoration: _fieldDecoration('Enter father name'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-
-              _label('Phone Number:'),
-              TextFormField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: _fieldDecoration('Enter number'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-
-              _label('Email:'),
-              TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: _fieldDecoration('Enter email'),
-              ),
-
-              _label('Home Address:'),
-              TextFormField(
-                controller: _addressController,
-                decoration: _fieldDecoration('Enter address'),
-              ),
-
-              _label('Gender:'),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedGender,
-                decoration: _fieldDecoration('Select gender'),
-                items: const [
-                  DropdownMenuItem(value: 'male', child: Text('Male')),
-                  DropdownMenuItem(value: 'female', child: Text('Female')),
-                  DropdownMenuItem(value: 'other', child: Text('Other')),
-                ],
-                onChanged: (value) => setState(() => _selectedGender = value),
-              ),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _label('DOB:'),
-                        InkWell(
-                          onTap: () => _pickDate(isDob: true),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEFEFEF),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              _dob == null ? 'DD/MM/YY' : _formatDate(_dob),
-                              style: TextStyle(
-                                color: _dob == null
-                                    ? Colors.grey
-                                    : Colors.black,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _label('Full Name:'),
+                    TextFormField(
+                      controller: _fullNameController,
+                      decoration: _fieldDecoration('Enter full name'),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _label('Admission Date:'),
-                        InkWell(
-                          onTap: () => _pickDate(isDob: false),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEFEFEF),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              _admissionDate == null
-                                  ? 'DD/MM/YY'
-                                  : _formatDate(_admissionDate),
-                              style: TextStyle(
-                                color: _admissionDate == null
-                                    ? Colors.grey
-                                    : Colors.black,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
 
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    _label("Father's Name:"),
+                    TextFormField(
+                      controller: _fatherNameController,
+                      decoration: _fieldDecoration('Enter father name'),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
+                    ),
+
+                    _label('Phone Number:'),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: _fieldDecoration('Enter number'),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
+                    ),
+
+                    _label('Email:'),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: _fieldDecoration('Enter email'),
+                    ),
+
+                    _label('Home Address:'),
+                    TextFormField(
+                      controller: _addressController,
+                      decoration: _fieldDecoration('Enter address'),
+                    ),
+
+                    _label('Gender:'),
+                    DropdownButtonFormField<String>(
+                      value: _selectedGender,
+                      decoration: _fieldDecoration('Select gender'),
+                      items: const [
+                        DropdownMenuItem(value: 'male', child: Text('Male')),
+                        DropdownMenuItem(
+                          value: 'female',
+                          child: Text('Female'),
+                        ),
+                        DropdownMenuItem(value: 'other', child: Text('Other')),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _selectedGender = value),
+                    ),
+
+                    Row(
                       children: [
-                        _label('Batch:'),
-                        DropdownButtonFormField<String>(
-                          initialValue: _selectedBatchId,
-                          decoration: _fieldDecoration('Select batch'),
-                          items: batchProvider.batches
-                              .map(
-                                (b) => DropdownMenuItem(
-                                  value: b.id,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _label('DOB:'),
+                              InkWell(
+                                onTap: () => _pickDate(isDob: true),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
                                   child: Text(
-                                    b.batchName,
-                                    overflow: TextOverflow.ellipsis,
+                                    _dob == null
+                                        ? 'DD/MM/YY'
+                                        : _formatDate(_dob),
+                                    style: TextStyle(
+                                      color: _dob == null
+                                          ? Colors.grey
+                                          : Colors.black,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            final batch = batchProvider.batches.firstWhere(
-                              (b) => b.id == value,
-                            );
-                            setState(() {
-                              _selectedBatchId = value;
-                              _selectedBatchName = batch.batchName;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _label('Monthly Fee:'),
-                        TextFormField(
-                          controller: _monthlyFeeController,
-                          keyboardType: TextInputType.number,
-                          decoration: _fieldDecoration('Monthly fee'),
-                          validator: (v) =>
-                              v == null || v.isEmpty ? 'Required' : null,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 30),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: studentProvider.isLoading
-                          ? null
-                          : _saveStudent,
-                      icon: studentProvider.isLoading
-                          ? const SizedBox(
-                              height: 16,
-                              width: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
                               ),
-                            )
-                          : const Icon(
-                              Icons.check_circle_outline,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                      label: Text(
-                        _isEditMode ? 'Update Student' : 'Save Student',
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFC3DFF0),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        side: const BorderSide(color: Colors.grey),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _label('Admission Date:'),
+                              InkWell(
+                                onTap: () => _pickDate(isDob: false),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    _admissionDate == null
+                                        ? 'DD/MM/YY'
+                                        : _formatDate(_admissionDate),
+                                    style: TextStyle(
+                                      color: _admissionDate == null
+                                          ? Colors.grey
+                                          : Colors.black,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.grey),
-                      ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
 
-              const SizedBox(height: 20),
-            ],
+                    _label(
+                      'Batch Name: (temporary text field — Batch module baad mein aayega)',
+                    ),
+                    TextFormField(
+                      controller: _batchNameController,
+                      decoration: _fieldDecoration('e.g. Batch-A Morning'),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
+                    ),
+
+                    _label('Monthly Fee:'),
+                    TextFormField(
+                      controller: _monthlyFeeController,
+                      keyboardType: TextInputType.number,
+                      decoration: _fieldDecoration('Monthly fee'),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: studentProvider.isLoading
+                                ? null
+                                : _saveStudent,
+                            icon: studentProvider.isLoading
+                                ? const SizedBox(
+                                    height: 16,
+                                    width: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.check_circle_outline,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                            label: Text(
+                              _isEditMode ? 'Update Student' : 'Save Student',
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2F80ED),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: const BorderSide(color: Colors.grey),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -47,7 +47,7 @@ dependencies:
   flutter_svg: ^2.2.0
 
   # Image Picker
-  image_picker: ^1.2.0
+  image_picker: ^1.2.3
 
   # Local Storage
   shared_preferences: ^2.5.5

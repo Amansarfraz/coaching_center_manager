@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
@@ -27,6 +28,17 @@ class _StudentListScreenState extends State<StudentListScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  ImageProvider? _getStudentImage(StudentModel student) {
+    if (student.profileImage != null && student.profileImage!.isNotEmpty) {
+      try {
+        return MemoryImage(base64Decode(student.profileImage!));
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
   }
 
   @override
@@ -190,6 +202,8 @@ class _StudentListScreenState extends State<StudentListScreen> {
     StudentModel student,
     StudentProvider provider,
   ) {
+    final image = _getStudentImage(student);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
@@ -212,14 +226,8 @@ class _StudentListScreenState extends State<StudentListScreen> {
               CircleAvatar(
                 radius: 24,
                 backgroundColor: const Color(0xFFE3EEFB),
-                backgroundImage:
-                    student.profileImage != null &&
-                        student.profileImage!.isNotEmpty
-                    ? NetworkImage(student.profileImage!)
-                    : null,
-                child:
-                    student.profileImage == null ||
-                        student.profileImage!.isEmpty
+                backgroundImage: image,
+                child: image == null
                     ? const Icon(Icons.person, color: Color(0xFF16305C))
                     : null,
               ),

@@ -1,7 +1,9 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
-import '../../providers/batch_provider.dart';
 import '../../models/student_model.dart';
 
 class StudentAddScreen extends StatefulWidget {
@@ -28,15 +30,14 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
   DateTime? _dob;
   DateTime? _admissionDate;
 
+  Uint8List? _pickedImageBytes;
+  String? _existingImageBase64;
+
   bool get _isEditMode => widget.studentToEdit != null;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<BatchProvider>(context, listen: false).fetchBatches();
-    });
 
     if (_isEditMode) {
       final s = widget.studentToEdit!;
@@ -50,6 +51,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       _selectedGender = s.gender;
       _dob = s.dob;
       _admissionDate = s.admissionDate;
+      _existingImageBase64 = s.profileImage;
     }
   }
 
@@ -63,6 +65,21 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
     _monthlyFeeController.dispose();
     _batchNameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 60,
+      maxWidth: 400,
+    );
+    if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
+      setState(() {
+        _pickedImageBytes = bytes;
+      });
+    }
   }
 
   Future<void> _pickDate({required bool isDob}) async {
@@ -102,8 +119,12 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       context,
       listen: false,
     );
-
     final batchNameValue = _batchNameController.text.trim();
+
+    String? imageBase64 = _existingImageBase64;
+    if (_pickedImageBytes != null) {
+      imageBase64 = base64Encode(_pickedImageBytes!);
+    }
 
     final data = {
       'full_name': _fullNameController.text.trim(),
@@ -114,10 +135,10 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       'gender': _selectedGender,
       'dob': _dob!.toIso8601String(),
       'admission_date': _admissionDate!.toIso8601String(),
-      'batch_id':
-          batchNameValue, // TEMPORARY - jab tak Batch module nahi banta, batch_name ko hi id ki tarah use kar rahe hain
+      'batch_id': batchNameValue,
       'batch_name': batchNameValue,
       'monthly_fee': double.tryParse(_monthlyFeeController.text.trim()) ?? 0,
+      'profile_image': imageBase64,
     };
 
     bool success;
@@ -226,6 +247,59 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Profile Photo Picker
+                    Center(
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 50,
+                              backgroundColor: const Color(0xFFE3EEFB),
+                              backgroundImage: _pickedImageBytes != null
+                                  ? MemoryImage(_pickedImageBytes!)
+                                  : (_existingImageBase64 != null &&
+                                            _existingImageBase64!.isNotEmpty
+                                        ? MemoryImage(
+                                                base64Decode(
+                                                  _existingImageBase64!,
+                                                ),
+                                              )
+                                              as ImageProvider
+                                        : null),
+                              child:
+                                  _pickedImageBytes == null &&
+                                      (_existingImageBase64 == null ||
+                                          _existingImageBase64!.isEmpty)
+                                  ? const Icon(
+                                      Icons.person,
+                                      size: 50,
+                                      color: Color(0xFF16305C),
+                                    )
+                                  : null,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF2F80ED),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
                     _label('Full Name:'),
                     TextFormField(
                       controller: _fullNameController,

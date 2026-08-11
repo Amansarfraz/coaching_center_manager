@@ -31,10 +31,11 @@ class _StudentListScreenState extends State<StudentListScreen> {
   }
 
   ImageProvider? _getStudentImage(StudentModel student) {
-    if (student.profileImage != null && student.profileImage!.isNotEmpty) {
+    final img = student.profileImage;
+    if (img != null && img.isNotEmpty) {
       try {
-        return MemoryImage(base64Decode(student.profileImage!));
-      } catch (_) {
+        return MemoryImage(base64Decode(img));
+      } catch (e) {
         return null;
       }
     }
@@ -50,38 +51,27 @@ class _StudentListScreenState extends State<StudentListScreen> {
       backgroundColor: const Color(0xFFE8F3FB),
       body: Column(
         children: [
-          // Header
+          // Header — plain rectangle, same style as Details screen
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(
-              color: Color(0xFF86BFE2),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(28),
-                bottomRight: Radius.circular(28),
-              ),
-            ),
+            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  borderRadius: BorderRadius.circular(30),
-                  child: const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Colors.black,
-                      size: 18,
-                    ),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 16),
                 const Text(
                   'Student List',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    fontSize: 20,
+                    fontSize: 22,
                     color: Colors.black,
                   ),
                 ),
@@ -224,7 +214,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
           Row(
             children: [
               CircleAvatar(
-                radius: 24,
+                radius: 26,
                 backgroundColor: const Color(0xFFE3EEFB),
                 backgroundImage: image,
                 child: image == null

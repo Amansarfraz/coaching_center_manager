@@ -201,37 +201,63 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       body: Column(
         children: [
           // Header
+          // Container(
+          //   width: double.infinity,
+          //   padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+          //   decoration: const BoxDecoration(
+          //     color: Color(0xFF86BFE2),
+          //     borderRadius: BorderRadius.only(
+          //       bottomLeft: Radius.circular(28),
+          //       bottomRight: Radius.circular(28),
+          //     ),
+          //   ),
+          //   child: Row(
+          //     children: [
+          //       InkWell(
+          //         onTap: () => Navigator.pop(context),
+          //         borderRadius: BorderRadius.circular(30),
+          //         child: const CircleAvatar(
+          //           radius: 18,
+          //           backgroundColor: Colors.white,
+          //           child: Icon(
+          //             Icons.arrow_back,
+          //             color: Colors.black,
+          //             size: 18,
+          //           ),
+          //         ),
+          //       ),
+          //       const SizedBox(width: 14),
+          //       Text(
+          //         _isEditMode ? 'Edit Student' : 'Add New Student',
+          //         style: const TextStyle(
+          //           fontWeight: FontWeight.w800,
+          //           fontSize: 20,
+          //           color: Colors.black,
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(
-              color: Color(0xFF86BFE2),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(28),
-                bottomRight: Radius.circular(28),
-              ),
-            ),
+            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  borderRadius: BorderRadius.circular(30),
-                  child: const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Colors.black,
-                      size: 18,
-                    ),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 16),
                 Text(
                   _isEditMode ? 'Edit Student' : 'Add New Student',
                   style: const TextStyle(
                     fontWeight: FontWeight.w800,
-                    fontSize: 20,
+                    fontSize: 22,
                     color: Colors.black,
                   ),
                 ),

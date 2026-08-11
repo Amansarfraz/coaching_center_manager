@@ -51,7 +51,6 @@ class _StudentListScreenState extends State<StudentListScreen> {
       backgroundColor: const Color(0xFFE8F3FB),
       body: Column(
         children: [
-          // Header — plain rectangle, same style as Details screen
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
@@ -79,7 +78,6 @@ class _StudentListScreenState extends State<StudentListScreen> {
             ),
           ),
 
-          // Search bar
           Padding(
             padding: const EdgeInsets.all(16),
             child: Container(
@@ -108,7 +106,6 @@ class _StudentListScreenState extends State<StudentListScreen> {
             ),
           ),
 
-          // List
           Expanded(
             child: studentProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())

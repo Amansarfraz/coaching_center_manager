@@ -72,9 +72,10 @@ class StudentDetailsScreen extends StatelessWidget {
   }
 
   ImageProvider? _getStudentImage() {
-    if (student.profileImage != null && student.profileImage!.isNotEmpty) {
+    final img = student.profileImage;
+    if (img != null && img.isNotEmpty) {
       try {
-        return MemoryImage(base64Decode(student.profileImage!));
+        return MemoryImage(base64Decode(img));
       } catch (_) {
         return null;
       }
@@ -90,7 +91,6 @@ class StudentDetailsScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFE8F3FB),
       body: Column(
         children: [
-          // Header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
@@ -124,7 +124,6 @@ class StudentDetailsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Profile photo
                   Container(
                     width: 150,
                     height: 150,
@@ -163,7 +162,6 @@ class StudentDetailsScreen extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // Personal Info
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _sectionCard(
@@ -184,7 +182,6 @@ class StudentDetailsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Home Address
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _sectionCard(
@@ -204,7 +201,6 @@ class StudentDetailsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Academic Info
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _sectionCard(
@@ -230,7 +226,6 @@ class StudentDetailsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Fee Info + Admission Date
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -335,7 +330,6 @@ class StudentDetailsScreen extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  // Edit / Delete buttons
                   Row(
                     children: [
                       Expanded(

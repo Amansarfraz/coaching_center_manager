@@ -23,8 +23,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
   final _monthlyFeeController = TextEditingController();
-  final _batchNameController =
-      TextEditingController(); // TEMPORARY - Batch module ban jaye to hata dena
+  final _batchNameController = TextEditingController();
 
   String? _selectedGender;
   DateTime? _dob;
@@ -38,7 +37,6 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
   @override
   void initState() {
     super.initState();
-
     if (_isEditMode) {
       final s = widget.studentToEdit!;
       _fullNameController.text = s.fullName;
@@ -200,44 +198,6 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       backgroundColor: const Color(0xFFE8F3FB),
       body: Column(
         children: [
-          // Header
-          // Container(
-          //   width: double.infinity,
-          //   padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-          //   decoration: const BoxDecoration(
-          //     color: Color(0xFF86BFE2),
-          //     borderRadius: BorderRadius.only(
-          //       bottomLeft: Radius.circular(28),
-          //       bottomRight: Radius.circular(28),
-          //     ),
-          //   ),
-          //   child: Row(
-          //     children: [
-          //       InkWell(
-          //         onTap: () => Navigator.pop(context),
-          //         borderRadius: BorderRadius.circular(30),
-          //         child: const CircleAvatar(
-          //           radius: 18,
-          //           backgroundColor: Colors.white,
-          //           child: Icon(
-          //             Icons.arrow_back,
-          //             color: Colors.black,
-          //             size: 18,
-          //           ),
-          //         ),
-          //       ),
-          //       const SizedBox(width: 14),
-          //       Text(
-          //         _isEditMode ? 'Edit Student' : 'Add New Student',
-          //         style: const TextStyle(
-          //           fontWeight: FontWeight.w800,
-          //           fontSize: 20,
-          //           color: Colors.black,
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
@@ -273,7 +233,6 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Profile Photo Picker
                     Center(
                       child: GestureDetector(
                         onTap: _pickImage,
@@ -450,9 +409,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                       ],
                     ),
 
-                    _label(
-                      'Batch Name: (temporary text field — Batch module baad mein aayega)',
-                    ),
+                    _label('Batch Name:'),
                     TextFormField(
                       controller: _batchNameController,
                       decoration: _fieldDecoration('e.g. Batch-A Morning'),

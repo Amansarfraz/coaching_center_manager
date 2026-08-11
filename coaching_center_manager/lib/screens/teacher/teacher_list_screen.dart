@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/teacher_provider.dart';
@@ -29,99 +30,108 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     super.dispose();
   }
 
+  ImageProvider? _getTeacherImage(TeacherModel teacher) {
+    final img = teacher.profileImage;
+    if (img != null && img.isNotEmpty) {
+      try {
+        return MemoryImage(base64Decode(img));
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final teacherProvider = Provider.of<TeacherProvider>(context);
     final teachers = teacherProvider.teachers;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF8CC2E8),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF8CC2E8),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF16305C)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Teacher List',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: Color(0xFF16305C),
-          ),
-        ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFFF5F8FF),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-        ),
-        child: Column(
-          children: [
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (value) {
-                    teacherProvider.searchTeachers(value);
-                  },
-                  decoration: const InputDecoration(
-                    hintText: 'Search Teacher',
-                    hintStyle: TextStyle(fontSize: 13),
-                    prefixIcon: Icon(Icons.search, size: 20),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 14),
+      backgroundColor: const Color(0xFFE8F3FB),
+      body: Column(
+        children: [
+          // Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            child: Row(
+              children: [
+                InkWell(
+                  onTap: () => Navigator.pop(context),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 24,
                   ),
+                ),
+                const SizedBox(width: 16),
+                const Text(
+                  'Teacher List',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) => teacherProvider.searchTeachers(value),
+                decoration: const InputDecoration(
+                  hintText: 'Search Teacher',
+                  hintStyle: TextStyle(fontSize: 13),
+                  prefixIcon: Icon(Icons.search, size: 20),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
+          ),
 
-            // List
-            Expanded(
-              child: teacherProvider.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : teachers.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No Teacher Found',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: () => teacherProvider.fetchTeachers(),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: teachers.length,
-                        itemBuilder: (context, index) {
-                          final teacher = teachers[index];
-                          return _teacherCard(
-                            context,
-                            teacher,
-                            teacherProvider,
-                          );
-                        },
-                      ),
+          // List
+          Expanded(
+            child: teacherProvider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : teachers.isEmpty
+                ? const Center(
+                    child: Text(
+                      'No Teacher Found',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
                     ),
-            ),
-          ],
-        ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () => teacherProvider.fetchTeachers(),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: teachers.length,
+                      itemBuilder: (context, index) {
+                        final teacher = teachers[index];
+                        return _teacherCard(context, teacher, teacherProvider);
+                      },
+                    ),
+                  ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF16305C),
@@ -145,6 +155,8 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     TeacherModel teacher,
     TeacherProvider provider,
   ) {
+    final image = _getTeacherImage(teacher);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(15),
@@ -167,14 +179,8 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
               CircleAvatar(
                 radius: 32,
                 backgroundColor: const Color(0xFFE3EEFB),
-                backgroundImage:
-                    teacher.profileImage != null &&
-                        teacher.profileImage!.isNotEmpty
-                    ? NetworkImage(teacher.profileImage!)
-                    : null,
-                child:
-                    teacher.profileImage == null ||
-                        teacher.profileImage!.isEmpty
+                backgroundImage: image,
+                child: image == null
                     ? const Icon(
                         Icons.person,
                         size: 30,

@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../providers/teacher_provider.dart';
 import '../../models/teacher_model.dart';
@@ -25,6 +28,9 @@ class _TeacherAddScreenState extends State<TeacherAddScreen> {
   String? _selectedGender;
   DateTime? _joiningDate;
 
+  Uint8List? _pickedImageBytes;
+  String? _existingImageBase64;
+
   bool get _isEditMode => widget.teacherToEdit != null;
 
   @override
@@ -41,6 +47,7 @@ class _TeacherAddScreenState extends State<TeacherAddScreen> {
       _assignedSubjectsController.text = t.assignedSubjects.join(', ');
       _selectedGender = t.gender;
       _joiningDate = t.joiningDate;
+      _existingImageBase64 = t.profileImage;
     }
   }
 
@@ -54,6 +61,21 @@ class _TeacherAddScreenState extends State<TeacherAddScreen> {
     _salaryController.dispose();
     _assignedSubjectsController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 60,
+      maxWidth: 400,
+    );
+    if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
+      setState(() {
+        _pickedImageBytes = bytes;
+      });
+    }
   }
 
   Future<void> _pickJoiningDate() async {
@@ -94,6 +116,11 @@ class _TeacherAddScreenState extends State<TeacherAddScreen> {
         .where((e) => e.isNotEmpty)
         .toList();
 
+    String? imageBase64 = _existingImageBase64;
+    if (_pickedImageBytes != null) {
+      imageBase64 = base64Encode(_pickedImageBytes!);
+    }
+
     final data = {
       'full_name': _fullNameController.text.trim(),
       'subject': _subjectController.text.trim(),
@@ -107,6 +134,7 @@ class _TeacherAddScreenState extends State<TeacherAddScreen> {
       'assigned_batch_ids': _isEditMode
           ? widget.teacherToEdit!.assignedBatchIds
           : [],
+      'profile_image': imageBase64,
     };
 
     bool success;
@@ -137,7 +165,7 @@ class _TeacherAddScreenState extends State<TeacherAddScreen> {
       hintText: hint,
       hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
       filled: true,
-      fillColor: const Color(0xFFEFEFEF),
+      fillColor: Colors.white,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
@@ -165,198 +193,278 @@ class _TeacherAddScreenState extends State<TeacherAddScreen> {
     final teacherProvider = Provider.of<TeacherProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF8CC2E8),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF16305C)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          _isEditMode ? 'Edit Teacher' : 'Add New Teacher',
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: Color(0xFF16305C),
-          ),
-        ),
-      ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _label('Full Name:'),
-              TextFormField(
-                controller: _fullNameController,
-                decoration: _fieldDecoration('Enter full name'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-
-              _label('Subject Name:'),
-              TextFormField(
-                controller: _subjectController,
-                decoration: _fieldDecoration('e.g. Mathematics'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-
-              _label('Phone Number:'),
-              TextFormField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: _fieldDecoration('Enter number'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-              ),
-
-              _label('Email:'),
-              TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: _fieldDecoration('Enter email'),
-              ),
-
-              _label('Qualifications:'),
-              TextFormField(
-                controller: _qualificationController,
-                decoration: _fieldDecoration('e.g. MSc in Applied Mathematics'),
-              ),
-
-              _label('Gender:'),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedGender,
-                decoration: _fieldDecoration('Select gender'),
-                items: const [
-                  DropdownMenuItem(value: 'male', child: Text('Male')),
-                  DropdownMenuItem(value: 'female', child: Text('Female')),
-                  DropdownMenuItem(value: 'other', child: Text('Other')),
-                ],
-                onChanged: (value) => setState(() => _selectedGender = value),
-              ),
-
-              _label('Assigned Subjects:'),
-              TextFormField(
-                controller: _assignedSubjectsController,
-                decoration: _fieldDecoration(
-                  'e.g. Mathematics, Statistics (comma separated)',
+      backgroundColor: const Color(0xFFE8F3FB),
+      body: Column(
+        children: [
+          // Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            child: Row(
+              children: [
+                InkWell(
+                  onTap: () => Navigator.pop(context),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 24,
+                  ),
                 ),
-              ),
+                const SizedBox(width: 16),
+                Text(
+                  _isEditMode ? 'Edit Teacher' : 'Add New Teacher',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _label('Joining Date:'),
-                        InkWell(
-                          onTap: _pickJoiningDate,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 14,
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Profile Photo Picker
+                    Center(
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 50,
+                              backgroundColor: const Color(0xFFE3EEFB),
+                              backgroundImage: _pickedImageBytes != null
+                                  ? MemoryImage(_pickedImageBytes!)
+                                  : (_existingImageBase64 != null &&
+                                            _existingImageBase64!.isNotEmpty
+                                        ? MemoryImage(
+                                                base64Decode(
+                                                  _existingImageBase64!,
+                                                ),
+                                              )
+                                              as ImageProvider
+                                        : null),
+                              child:
+                                  _pickedImageBytes == null &&
+                                      (_existingImageBase64 == null ||
+                                          _existingImageBase64!.isEmpty)
+                                  ? const Icon(
+                                      Icons.person,
+                                      size: 50,
+                                      color: Color(0xFF16305C),
+                                    )
+                                  : null,
                             ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEFEFEF),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              _joiningDate == null
-                                  ? 'DD/MM/YYYY'
-                                  : _formatDate(_joiningDate),
-                              style: TextStyle(
-                                color: _joiningDate == null
-                                    ? Colors.grey
-                                    : Colors.black,
-                                fontSize: 13,
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF2F80ED),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
                               ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    _label('Full Name:'),
+                    TextFormField(
+                      controller: _fullNameController,
+                      decoration: _fieldDecoration('Enter full name'),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
+                    ),
+
+                    _label('Subject Name:'),
+                    TextFormField(
+                      controller: _subjectController,
+                      decoration: _fieldDecoration('e.g. Mathematics'),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
+                    ),
+
+                    _label('Phone Number:'),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: _fieldDecoration('Enter number'),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Required' : null,
+                    ),
+
+                    _label('Email:'),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: _fieldDecoration('Enter email'),
+                    ),
+
+                    _label('Qualifications:'),
+                    TextFormField(
+                      controller: _qualificationController,
+                      decoration: _fieldDecoration(
+                        'e.g. MSc in Applied Mathematics',
+                      ),
+                    ),
+
+                    _label('Gender:'),
+                    DropdownButtonFormField<String>(
+                      value: _selectedGender,
+                      decoration: _fieldDecoration('Select gender'),
+                      items: const [
+                        DropdownMenuItem(value: 'male', child: Text('Male')),
+                        DropdownMenuItem(
+                          value: 'female',
+                          child: Text('Female'),
+                        ),
+                        DropdownMenuItem(value: 'other', child: Text('Other')),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _selectedGender = value),
+                    ),
+
+                    _label('Assigned Subjects:'),
+                    TextFormField(
+                      controller: _assignedSubjectsController,
+                      decoration: _fieldDecoration(
+                        'e.g. Mathematics, Statistics (comma separated)',
+                      ),
+                    ),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _label('Joining Date:'),
+                              InkWell(
+                                onTap: _pickJoiningDate,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    _joiningDate == null
+                                        ? 'DD/MM/YYYY'
+                                        : _formatDate(_joiningDate),
+                                    style: TextStyle(
+                                      color: _joiningDate == null
+                                          ? Colors.grey
+                                          : Colors.black,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _label('Salary Info (Monthly):'),
+                              TextFormField(
+                                controller: _salaryController,
+                                keyboardType: TextInputType.number,
+                                decoration: _fieldDecoration('Rs. 0'),
+                                validator: (v) =>
+                                    v == null || v.isEmpty ? 'Required' : null,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: teacherProvider.isLoading
+                                ? null
+                                : _saveTeacher,
+                            icon: teacherProvider.isLoading
+                                ? const SizedBox(
+                                    height: 16,
+                                    width: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.check_circle_outline,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                            label: Text(
+                              _isEditMode ? 'Update Teacher' : 'Save Teacher',
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2F80ED),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: const BorderSide(color: Colors.grey),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.grey),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _label('Salary Info (Monthly):'),
-                        TextFormField(
-                          controller: _salaryController,
-                          keyboardType: TextInputType.number,
-                          decoration: _fieldDecoration('Rs. 0'),
-                          validator: (v) =>
-                              v == null || v.isEmpty ? 'Required' : null,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
-
-              const SizedBox(height: 30),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: teacherProvider.isLoading
-                          ? null
-                          : _saveTeacher,
-                      icon: teacherProvider.isLoading
-                          ? const SizedBox(
-                              height: 16,
-                              width: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.check_circle_outline,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                      label: Text(
-                        _isEditMode ? 'Update Teacher' : 'Save Teacher',
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2F80ED),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        side: const BorderSide(color: Colors.grey),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

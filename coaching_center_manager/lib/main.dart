@@ -16,6 +16,7 @@ import 'screens/auth/splash_screen.dart';
 import 'screens/auth/get_started_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/teacher/teacher_list_screen.dart';
+//import 'screens/settings/settings_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,7 @@ class CoachingCenterApp extends StatelessWidget {
           '/get_started_screen': (context) => const GetStartedScreen(),
           '/login_screen': (context) => const LoginScreen(),
           '/teacher_list_screen': (context) => const TeacherListScreen(),
+          //'/settings_screen': (context) => const SettingsScreen(),
         },
       ),
     );

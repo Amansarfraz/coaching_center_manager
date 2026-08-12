@@ -300,11 +300,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
             MaterialPageRoute(builder: (_) => const TeacherListScreen()),
           );
         }),
-        _quickAction(Icons.groups_2_outlined, 'Create Batch', () {}),
+        _quickAction(Icons.groups_2_outlined, 'Create Batch', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const BatchAddScreen()),
+          );
+        }),
         _quickAction(Icons.settings_outlined, 'Setting', () {
           Navigator.pushNamed(context, '/settings_screen');
         }),
-        _quickAction(Icons.check_circle_outline, 'Record Attendance', () {}),
+        _quickAction(Icons.check_circle_outline, 'Record Attendance', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const MarkAttendanceScreen()),
+          );
+        }),
         _quickAction(Icons.receipt_long_outlined, 'View Fees', () {}),
       ];
     } else if (role == 'teacher') {

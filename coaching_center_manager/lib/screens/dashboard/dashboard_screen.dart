@@ -6,8 +6,9 @@ import '../../providers/teacher_provider.dart';
 import '../../providers/batch_provider.dart';
 import '../student/student_list_screen.dart';
 import '../teacher/teacher_list_screen.dart';
-import '../batch/batch_add_screen.dart';
+import '../batch/batch_list_screen.dart';
 import '../attendance/mark_attendance_screen.dart';
+import '../attendance/attendance_history_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String role;
@@ -305,7 +306,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _quickAction(Icons.groups_2_outlined, 'Create Batch', () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const BatchAddScreen()),
+            MaterialPageRoute(builder: (_) => const BatchListScreen()),
           );
         }),
         _quickAction(Icons.settings_outlined, 'Setting', () {
@@ -517,6 +518,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            _quickAction(Icons.history, 'Attendance History', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AttendanceHistoryScreen(),
+                ),
+              );
+            }),
           ],
         ),
       ),

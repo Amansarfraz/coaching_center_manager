@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/student_provider.dart';
 import '../../providers/teacher_provider.dart';
 import '../../providers/batch_provider.dart';
+import '../../providers/dashboard_provider.dart';
 import '../student/student_list_screen.dart';
 import '../teacher/teacher_list_screen.dart';
 import '../batch/batch_list_screen.dart';
@@ -26,7 +27,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
       Provider.of<StudentProvider>(context, listen: false).fetchStudents();
       Provider.of<TeacherProvider>(context, listen: false).fetchTeachers();
       Provider.of<BatchProvider>(context, listen: false).fetchBatches();
+      Provider.of<DashboardProvider>(context, listen: false).fetchSummary();
     });
+  }
+
+  Future<void> _refreshAll(BuildContext context) async {
+    await Provider.of<StudentProvider>(context, listen: false).fetchStudents();
+    await Provider.of<TeacherProvider>(context, listen: false).fetchTeachers();
+    await Provider.of<BatchProvider>(context, listen: false).fetchBatches();
+    await Provider.of<DashboardProvider>(context, listen: false).fetchSummary();
+  }
+
+  IconData _activityIcon(String type) {
+    switch (type) {
+      case 'student':
+        return Icons.person_add_alt;
+      case 'teacher':
+        return Icons.badge_outlined;
+      case 'batch':
+        return Icons.groups_outlined;
+      default:
+        return Icons.notifications_none;
+    }
   }
 
   @override
@@ -35,6 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final studentProvider = Provider.of<StudentProvider>(context);
     final teacherProvider = Provider.of<TeacherProvider>(context);
     final batchProvider = Provider.of<BatchProvider>(context);
+    final dashboardProvider = Provider.of<DashboardProvider>(context);
 
     final userName = authProvider.currentUser?.fullName ?? 'Admin';
     final totalStudents = studentProvider.students.length;
@@ -42,19 +65,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final totalBatches = batchProvider.batches.length;
 
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFE8F3FB,
-      ), // halka background (86BFE2 se lighter)
+      backgroundColor: const Color(0xFFE8F3FB),
       body: RefreshIndicator(
-        onRefresh: () async {
-          await studentProvider.fetchStudents();
-          await teacherProvider.fetchTeachers();
-          await batchProvider.fetchBatches();
-        },
+        onRefresh: () => _refreshAll(context),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Header (86BFE2 background, black text)
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
@@ -145,18 +161,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-            // Body content
             SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // Stats Cards — sirf Admin ko
                   if (widget.role.toLowerCase() == 'admin') ...[
                     _statCard(
                       icon: Icons.people_alt_outlined,
                       title: 'Total Students',
                       value: totalStudents.toString(),
-                      subtitle: 'Active: $totalStudents   New: 0 this month',
+                      subtitle: 'Active: $totalStudents',
                       color: const Color(0xFF2F80ED),
                     ),
                     const SizedBox(height: 12),
@@ -164,7 +178,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: Icons.school_outlined,
                       title: 'Total Teachers',
                       value: totalTeachers.toString(),
-                      subtitle: 'Full-time: $totalTeachers   part-time: 0',
+                      subtitle: 'Registered: $totalTeachers',
                       color: const Color(0xFFF2994A),
                     ),
                     const SizedBox(height: 12),
@@ -172,32 +186,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: Icons.book_outlined,
                       title: 'Total Batches',
                       value: totalBatches.toString(),
-                      subtitle: 'Morning & Evening batches',
+                      subtitle: 'Running: $totalBatches',
                       color: const Color(0xFF27AE60),
                     ),
                     const SizedBox(height: 20),
 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _miniCard(
-                            title: "Today's Attendance",
-                            value: totalStudents == 0 ? '0%' : '92%',
-                            subtitle: 'Present 550   Absent 200',
-                          ),
+                    // Real-time attendance & fee
+                    if (dashboardProvider.isLoading)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: CircularProgressIndicator(),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _miniCard(
-                            title: 'Monthly Fee collection',
-                            value: '\$120,500',
-                            subtitle: 'Target \$140,000   Paid: 86%',
+                      )
+                    else
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _miniCard(
+                              title: "Today's Attendance",
+                              value:
+                                  '${dashboardProvider.attendancePercentage.toStringAsFixed(0)}%',
+                              subtitle:
+                                  'Present ${dashboardProvider.attendancePresent}   Absent ${dashboardProvider.attendanceAbsent}',
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _miniCard(
+                              title: 'Monthly Fee Collection',
+                              value:
+                                  'Rs.${dashboardProvider.feePaid.toStringAsFixed(0)}',
+                              subtitle:
+                                  'Target Rs.${dashboardProvider.feeTarget.toStringAsFixed(0)}   Paid: ${dashboardProvider.feePercentage.toStringAsFixed(0)}%',
+                            ),
+                          ),
+                        ],
+                      ),
                     const SizedBox(height: 20),
 
+                    // Real Recent Activity
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -214,48 +242,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Recent Activity',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              Text(
-                                'Detailed Chart',
-                                style: TextStyle(
-                                  color: Colors.blue.shade700,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
+                          const Text(
+                            'Recent Activity',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
                           ),
                           const SizedBox(height: 12),
-                          _activityTile(
-                            Icons.person_add_alt,
-                            'New Student',
-                            'Ayesha Khan joined class 9A',
-                          ),
-                          _activityTile(
-                            Icons.badge_outlined,
-                            'Teacher Profile Update',
-                            'Mr. Ahmed',
-                          ),
-                          _activityTile(
-                            Icons.groups_outlined,
-                            'Batch 12',
-                            'Timetable Modified',
-                          ),
+                          if (dashboardProvider.recentActivity.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              child: Text(
+                                'No recent activity yet',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            )
+                          else
+                            ...dashboardProvider.recentActivity.map((activity) {
+                              return _activityTile(
+                                _activityIcon(activity['type']),
+                                activity['title'],
+                                activity['subtitle'],
+                              );
+                            }),
                         ],
                       ),
                     ),
                     const SizedBox(height: 20),
                   ],
 
-                  // Quick Actions
                   const Text(
                     'Quick Actions',
                     style: TextStyle(
@@ -291,19 +310,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     if (role == 'admin') {
       return [
-        _quickAction(Icons.person_add_outlined, 'Add Student', () {
+        _quickAction(Icons.person_add_outlined, 'Students', () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const StudentListScreen()),
           );
         }),
-        _quickAction(Icons.person_add_alt_1_outlined, 'Add Teacher', () {
+        _quickAction(Icons.person_add_alt_1_outlined, 'Teachers', () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const TeacherListScreen()),
           );
         }),
-        _quickAction(Icons.groups_2_outlined, 'Create Batch', () {
+        _quickAction(Icons.groups_2_outlined, 'Batches', () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const BatchListScreen()),
@@ -318,16 +337,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
             MaterialPageRoute(builder: (_) => const MarkAttendanceScreen()),
           );
         }),
-        _quickAction(Icons.receipt_long_outlined, 'View Fees', () {}),
+        _quickAction(Icons.history, 'Attendance History', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AttendanceHistoryScreen()),
+          );
+        }),
       ];
     } else if (role == 'teacher') {
       return [
-        _quickAction(Icons.groups_2_outlined, 'My Batches', () {}),
-        _quickAction(Icons.check_circle_outline, 'Record Attendance', () {}),
+        _quickAction(Icons.groups_2_outlined, 'My Batches', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const BatchListScreen()),
+          );
+        }),
+        _quickAction(Icons.check_circle_outline, 'Record Attendance', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const MarkAttendanceScreen()),
+          );
+        }),
         _quickAction(Icons.people_alt_outlined, 'My Students', () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const StudentListScreen()),
+          );
+        }),
+        _quickAction(Icons.history, 'Attendance History', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AttendanceHistoryScreen()),
           );
         }),
         _quickAction(Icons.settings_outlined, 'Setting', () {
@@ -336,9 +376,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ];
     } else {
       return [
-        _quickAction(Icons.check_circle_outline, 'My Attendance', () {}),
+        _quickAction(Icons.check_circle_outline, 'My Attendance', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AttendanceHistoryScreen()),
+          );
+        }),
         _quickAction(Icons.receipt_long_outlined, 'My Fees', () {}),
-        _quickAction(Icons.groups_2_outlined, 'My Batch', () {}),
+        _quickAction(Icons.groups_2_outlined, 'My Batch', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const BatchListScreen()),
+          );
+        }),
         _quickAction(Icons.settings_outlined, 'Setting', () {
           Navigator.pushNamed(context, '/settings_screen');
         }),
@@ -454,7 +504,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundColor: const Color.fromARGB(255, 171, 208, 231),
+            backgroundColor: const Color(0xFFE3EEFB),
             child: Icon(icon, size: 16, color: const Color(0xFF16305C)),
           ),
           const SizedBox(width: 10),
@@ -472,6 +522,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Text(
                   subtitle,
                   style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -518,14 +569,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            _quickAction(Icons.history, 'Attendance History', () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AttendanceHistoryScreen(),
-                ),
-              );
-            }),
           ],
         ),
       ),

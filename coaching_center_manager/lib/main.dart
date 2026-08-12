@@ -10,6 +10,7 @@ import 'providers/teacher_provider.dart';
 import 'providers/batch_provider.dart';
 import 'providers/attendance_provider.dart';
 import 'providers/fee_provider.dart';
+import 'providers/dashboard_provider.dart';
 
 // Screens
 import 'screens/auth/splash_screen.dart';
@@ -36,6 +37,7 @@ class CoachingCenterApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BatchProvider()),
         ChangeNotifierProvider(create: (_) => AttendanceProvider()),
         ChangeNotifierProvider(create: (_) => FeeProvider()),
+        ChangeNotifierProvider(create: (_) => DashboardProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -53,7 +53,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
       case 'absent':
         return const Color(0xFFEB5757);
       default:
-        return const Color(0xFFF2C94C);
+        return const Color(0xFFF2994A);
     }
   }
 
@@ -63,9 +63,11 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     final attendanceProvider = Provider.of<AttendanceProvider>(context);
     final records = attendanceProvider.attendanceRecords;
 
-    final presentCount = records.where((r) => r.status == 'present').length;
-    final absentCount = records.where((r) => r.status == 'absent').length;
-    final leaveCount = records.where((r) => r.status == 'leave').length;
+    final total = records.length;
+    final present = records.where((r) => r.status == 'present').length;
+    final absent = records.where((r) => r.status == 'absent').length;
+    final leave = records.where((r) => r.status == 'leave').length;
+    final presentPct = total == 0 ? 0.0 : (present / total) * 100;
 
     return Scaffold(
       backgroundColor: const Color(0xFFE8F3FB),
@@ -76,83 +78,103 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
             decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                InkWell(
-                  onTap: () => Navigator.pop(context),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.black,
-                    size: 24,
-                  ),
+                Row(
+                  children: [
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.black,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Text(
+                      'Attendance History',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                const Text(
-                  'Attendance History',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 22,
-                    color: Colors.black,
-                  ),
+                const CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.person, size: 18, color: Color(0xFF16305C)),
                 ),
               ],
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
+            child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<BatchModel>(
-                      value: _selectedBatch,
-                      hint: const Text('Select Batch'),
-                      isExpanded: true,
-                      items: batchProvider.batches
-                          .map(
-                            (b) => DropdownMenuItem(
-                              value: b,
-                              child: Text(b.batchName),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() => _selectedBatch = value);
-                        _fetchHistory();
-                      },
+                Expanded(
+                  child: InkWell(
+                    onTap: _pickDate,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 16,
+                            color: Color(0xFF16305C),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                InkWell(
-                  onTap: _pickDate,
+                const SizedBox(width: 10),
+                Expanded(
                   child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 14,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.calendar_today_outlined,
-                          size: 18,
-                          color: Color(0xFF16305C),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<BatchModel>(
+                        value: _selectedBatch,
+                        hint: const Text(
+                          'Select Batch',
+                          style: TextStyle(fontSize: 12),
                         ),
-                        const SizedBox(width: 10),
-                        Text(
-                          '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ],
+                        isExpanded: true,
+                        items: batchProvider.batches
+                            .map(
+                              (b) => DropdownMenuItem(
+                                value: b,
+                                child: Text(
+                                  b.batchName,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() => _selectedBatch = value);
+                          _fetchHistory();
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -160,43 +182,97 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
             ),
           ),
 
-          if (_selectedBatch != null && records.isNotEmpty)
+          if (_selectedBatch != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   Expanded(
-                    child: _summaryCard(
-                      'Present',
-                      presentCount,
-                      const Color(0xFF27AE60),
+                    flex: 2,
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Total Students: $total',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            height: 80,
+                            width: 80,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SizedBox(
+                                  height: 80,
+                                  width: 80,
+                                  child: CircularProgressIndicator(
+                                    value: presentPct / 100,
+                                    strokeWidth: 8,
+                                    backgroundColor: const Color(0xFFEFEFEF),
+                                    color: const Color(0xFF27AE60),
+                                  ),
+                                ),
+                                Text(
+                                  '${presentPct.toStringAsFixed(0)}%',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF16305C),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Present: $present ($total==0?0:${(present)}/$total)',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _summaryCard(
-                      'Absent',
-                      absentCount,
-                      const Color(0xFFEB5757),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _summaryCard(
-                      'Leave',
-                      leaveCount,
-                      const Color(0xFFF2C94C),
+                    child: Column(
+                      children: [
+                        _miniStatCard(
+                          Icons.cancel_outlined,
+                          'Absent: $absent',
+                          const Color(0xFFEB5757),
+                        ),
+                        const SizedBox(height: 8),
+                        _miniStatCard(
+                          Icons.beach_access_outlined,
+                          'On Leave: $leave',
+                          const Color(0xFFF2994A),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
 
+          const SizedBox(height: 10),
+
           Expanded(
             child: _selectedBatch == null
                 ? const Center(
                     child: Text(
-                      'Select a batch to view history',
+                      'Select a batch to view attendance history',
                       style: TextStyle(color: Colors.grey),
                     ),
                   )
@@ -255,17 +331,16 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: _statusColor(
-                                  record.status,
-                                ).withOpacity(0.1),
+                                color: _statusColor(record.status),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                record.status,
-                                style: TextStyle(
-                                  fontSize: 12,
+                                record.status[0].toUpperCase() +
+                                    record.status.substring(1),
+                                style: const TextStyle(
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: _statusColor(record.status),
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
@@ -280,25 +355,23 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     );
   }
 
-  Widget _summaryCard(String label, int count, Color color) {
+  Widget _miniStatCard(IconData icon, String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(height: 6),
           Text(
-            count.toString(),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: color,
-            ),
+            text,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 2),
-          Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
         ],
       ),
     );

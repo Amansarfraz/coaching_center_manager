@@ -15,8 +15,7 @@ class MarkAttendanceScreen extends StatefulWidget {
 class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
   BatchModel? _selectedBatch;
   DateTime _selectedDate = DateTime.now();
-  final Map<String, String> _statusMap =
-      {}; // studentId -> present/absent/leave
+  final Map<String, String> _statusMap = {};
 
   @override
   void initState() {
@@ -34,9 +33,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
+    if (picked != null) setState(() => _selectedDate = picked);
   }
 
   Future<void> _submitAttendance() async {
@@ -85,21 +82,21 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Attendance marked successfully')),
+        const SnackBar(content: Text('Attendance saved successfully')),
       );
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            attendanceProvider.errorMessage ?? 'Failed to mark attendance',
+            attendanceProvider.errorMessage ?? 'Failed to save attendance',
           ),
         ),
       );
     }
   }
 
-  Widget _statusChip(
+  Widget _pillButton(
     String studentId,
     String status,
     String label,
@@ -109,17 +106,17 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
     return GestureDetector(
       onTap: () => setState(() => _statusMap[studentId] = status),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        margin: const EdgeInsets.only(left: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        margin: const EdgeInsets.only(left: 4),
         decoration: BoxDecoration(
-          color: isSelected ? color : color.withOpacity(0.1),
+          color: isSelected ? color : color.withOpacity(0.08),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 11,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             color: isSelected ? Colors.white : color,
           ),
         ),
@@ -134,7 +131,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
     final attendanceProvider = Provider.of<AttendanceProvider>(context);
 
     final batchStudents = _selectedBatch == null
-        ? []
+        ? <dynamic>[]
         : studentProvider.students
               .where((s) => s.batchName == _selectedBatch!.batchName)
               .toList();
@@ -147,84 +144,93 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
             decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InkWell(
-                  onTap: () => Navigator.pop(context),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.black,
-                    size: 24,
-                  ),
+                Row(
+                  children: [
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.black,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Text(
+                      'Mark Attendance',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                const Text(
-                  'Mark Attendance',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 22,
-                    color: Colors.black,
+                if (_selectedBatch != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 40, top: 4),
+                    child: Text(
+                      '${_selectedBatch!.batchName}  •  ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black87,
+                      ),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
+            child: Row(
               children: [
-                // Batch dropdown
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<BatchModel>(
-                      value: _selectedBatch,
-                      hint: const Text('Select Batch'),
-                      isExpanded: true,
-                      items: batchProvider.batches
-                          .map(
-                            (b) => DropdownMenuItem(
-                              value: b,
-                              child: Text(b.batchName),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) =>
-                          setState(() => _selectedBatch = value),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<BatchModel>(
+                        value: _selectedBatch,
+                        hint: const Text(
+                          'Select Batch',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                        isExpanded: true,
+                        items: batchProvider.batches
+                            .map(
+                              (b) => DropdownMenuItem(
+                                value: b,
+                                child: Text(b.batchName),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) =>
+                            setState(() => _selectedBatch = value),
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                // Date picker
+                const SizedBox(width: 10),
                 InkWell(
                   onTap: _pickDate,
                   child: Container(
-                    width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
+                      horizontal: 12,
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.calendar_today_outlined,
-                          size: 18,
-                          color: Color(0xFF16305C),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ],
+                    child: const Icon(
+                      Icons.calendar_today_outlined,
+                      size: 20,
+                      color: Color(0xFF16305C),
                     ),
                   ),
                 ),
@@ -282,28 +288,28 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                                 student.fullName,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                                  fontSize: 13,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            _statusChip(
+                            _pillButton(
                               student.id,
                               'present',
-                              'P',
+                              'Present',
                               const Color(0xFF27AE60),
                             ),
-                            _statusChip(
+                            _pillButton(
                               student.id,
                               'absent',
-                              'A',
+                              'Absent',
                               const Color(0xFFEB5757),
                             ),
-                            _statusChip(
+                            _pillButton(
                               student.id,
                               'leave',
-                              'L',
-                              const Color(0xFFF2C94C),
+                              'Leave',
+                              const Color(0xFFF2994A),
                             ),
                           ],
                         ),
@@ -316,32 +322,28 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
               padding: const EdgeInsets.all(16),
               child: SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
+                child: ElevatedButton(
                   onPressed: attendanceProvider.isLoading
                       ? null
                       : _submitAttendance,
-                  icon: attendanceProvider.isLoading
-                      ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(
-                          Icons.check_circle_outline,
-                          color: Colors.white,
-                        ),
-                  label: const Text('Save Attendance'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF16305C),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(25),
                     ),
                   ),
+                  child: attendanceProvider.isLoading
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Save Attendance'),
                 ),
               ),
             ),

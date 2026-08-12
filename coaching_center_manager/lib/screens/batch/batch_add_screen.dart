@@ -205,7 +205,7 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                     _label('Batch Name:'),
                     TextFormField(
                       controller: _batchNameController,
-                      decoration: _fieldDecoration('e.g. BS-Math 2024'),
+                      decoration: _fieldDecoration('Enter Batch Name'),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
@@ -213,7 +213,7 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                     _label('Course Name:'),
                     TextFormField(
                       controller: _courseNameController,
-                      decoration: _fieldDecoration('e.g. Mathematics'),
+                      decoration: _fieldDecoration('Enter Course Name'),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
@@ -238,7 +238,7 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                           )
                         : DropdownButtonFormField<String>(
                             value: _selectedTeacherId,
-                            decoration: _fieldDecoration('Select teacher'),
+                            decoration: _fieldDecoration('Select Teacher'),
                             isExpanded: true,
                             items: teacherProvider.teachers
                                 .map(
@@ -252,18 +252,20 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                                 setState(() => _selectedTeacherId = value),
                           ),
 
-                    _label('Classroom:'),
+                    _label('Class Room:'),
                     TextFormField(
                       controller: _classroomController,
-                      decoration: _fieldDecoration('e.g. Room 302, 3rd Floor'),
+                      decoration: _fieldDecoration('Enter Class Room e.g. A1'),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
 
-                    _label('Timing:'),
+                    _label('Batch Timing:'),
                     TextFormField(
                       controller: _timingController,
-                      decoration: _fieldDecoration('e.g. MWF 09:30 - 11:00'),
+                      decoration: _fieldDecoration(
+                        'Select Timing (e.g. M-W-F 10-12)',
+                      ),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
@@ -272,79 +274,63 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                     TextFormField(
                       controller: _capacityController,
                       keyboardType: TextInputType.number,
-                      decoration: _fieldDecoration('e.g. 40'),
+                      decoration: _fieldDecoration('Enter Capacity (e.g. 50)'),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _label('Start Date:'),
-                              InkWell(
-                                onTap: () => _pickDate(isStart: true),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 14,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    _startDate == null
-                                        ? 'DD/MM/YYYY'
-                                        : _formatDate(_startDate),
-                                    style: TextStyle(
-                                      color: _startDate == null
-                                          ? Colors.grey
-                                          : Colors.black,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                    _label('Start Date:'),
+                    InkWell(
+                      onTap: () => _pickDate(isStart: true),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          _startDate == null
+                              ? 'Select Start Date'
+                              : _formatDate(_startDate),
+                          style: TextStyle(
+                            color: _startDate == null
+                                ? Colors.grey
+                                : Colors.black,
+                            fontSize: 13,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _label('End Date (optional):'),
-                              InkWell(
-                                onTap: () => _pickDate(isStart: false),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 14,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    _endDate == null
-                                        ? 'DD/MM/YYYY'
-                                        : _formatDate(_endDate),
-                                    style: TextStyle(
-                                      color: _endDate == null
-                                          ? Colors.grey
-                                          : Colors.black,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                      ),
+                    ),
+
+                    _label('End Date:'),
+                    InkWell(
+                      onTap: () => _pickDate(isStart: false),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          _endDate == null
+                              ? 'Select End Date'
+                              : _formatDate(_endDate),
+                          style: TextStyle(
+                            color: _endDate == null
+                                ? Colors.grey
+                                : Colors.black,
+                            fontSize: 13,
                           ),
                         ),
-                      ],
+                      ),
                     ),
 
                     const SizedBox(height: 30),
@@ -352,27 +338,10 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: ElevatedButton.icon(
+                          child: ElevatedButton(
                             onPressed: batchProvider.isLoading
                                 ? null
                                 : _saveBatch,
-                            icon: batchProvider.isLoading
-                                ? const SizedBox(
-                                    height: 16,
-                                    width: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(
-                                    Icons.check_circle_outline,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                            label: Text(
-                              _isEditMode ? 'Update Batch' : 'Save Batch',
-                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2F80ED),
                               foregroundColor: Colors.white,
@@ -381,6 +350,18 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
+                            child: batchProvider.isLoading
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Text(
+                                    _isEditMode ? 'Update Batch' : 'Save Batch',
+                                  ),
                           ),
                         ),
                         const SizedBox(width: 12),

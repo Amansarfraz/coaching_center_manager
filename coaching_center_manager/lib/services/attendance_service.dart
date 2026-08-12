@@ -101,4 +101,17 @@ class AttendanceService {
     }
     return 'Request failed. Please try again.';
   }
+
+  Future<Map<String, dynamic>> getBatchSummary(String batchId) async {
+    try {
+      final response = await _apiService.dio.get(
+        '/attendance/batch-summary/$batchId',
+      );
+      return {'success': true, 'summary': response.data};
+    } on DioException catch (e) {
+      return {'success': false, 'message': _handleError(e)};
+    } catch (e) {
+      return {'success': false, 'message': 'Something went wrong.'};
+    }
+  }
 }

@@ -6,6 +6,8 @@ import '../../providers/teacher_provider.dart';
 import '../../providers/batch_provider.dart';
 import '../student/student_list_screen.dart';
 import '../teacher/teacher_list_screen.dart';
+import '../batch/batch_add_screen.dart';
+import '../attendance/mark_attendance_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String role;

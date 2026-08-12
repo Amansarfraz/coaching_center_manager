@@ -12,6 +12,8 @@ class AttendanceProvider extends ChangeNotifier {
 
   List<AttendanceModel> get attendanceRecords => _attendanceRecords;
   Map<String, dynamic>? get stats => _stats;
+  Map<String, dynamic>? _batchSummary;
+  Map<String, dynamic>? get batchSummary => _batchSummary;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -63,6 +65,20 @@ class AttendanceProvider extends ChangeNotifier {
       _attendanceRecords = result['records'];
     } else {
       _errorMessage = result['message'];
+    }
+    notifyListeners();
+  }
+
+  Future<void> fetchBatchSummary(String batchId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final result = await _attendanceService.getBatchSummary(batchId);
+
+    _isLoading = false;
+
+    if (result['success'] == true) {
+      _batchSummary = result['summary'];
     }
     notifyListeners();
   }

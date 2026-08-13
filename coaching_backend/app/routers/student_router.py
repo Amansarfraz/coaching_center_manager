@@ -4,14 +4,19 @@ from beanie import PydanticObjectId
 
 from app.models.student import Student
 from app.schemas.student_schema import StudentCreateSchema, StudentUpdateSchema
+from app.models.notification import Notification
+from datetime import datetime
 
 router = APIRouter(prefix="/api/students", tags=["Students"])
+
 
 
 @router.get("")
 async def get_all_students():
     students = await Student.find_all().to_list()
+    
     return {"students": students}
+
 
 
 @router.get("/search")
@@ -51,7 +56,16 @@ async def create_student(data: StudentCreateSchema):
         profile_image=data.profile_image,
     )
     await student.insert()
+    notif = Notification(
+        title="New Student Added",
+        message=f"{data.full_name} joined {data.batch_name}",
+        target_role="admin",
+        related_type="student",
+        created_at=datetime.utcnow(),
+    )
+    await notif.insert()
     return student
+
 
 
 @router.put("/{student_id}")

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../auth/login_screen.dart';
 import 'logout_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -23,12 +21,7 @@ class SettingsScreen extends StatelessWidget {
             child: Row(
               children: [
                 InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LogoutScreen()),
-                    );
-                  },
+                  onTap: () => Navigator.pop(context),
                   child: const Icon(Icons.arrow_back, color: Colors.black),
                 ),
                 const SizedBox(width: 16),
@@ -101,7 +94,12 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   InkWell(
-                    onTap: () => _showLogoutDialog(context),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LogoutScreen()),
+                      );
+                    },
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -164,79 +162,6 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2F80ED),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.logout, color: Colors.white, size: 32),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Are you sure you want to log out?',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final authProvider = Provider.of<AuthProvider>(
-                      context,
-                      listen: false,
-                    );
-                    await authProvider.logout();
-                    if (dialogContext.mounted) {
-                      Navigator.of(dialogContext).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                        (route) => false,
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2F80ED),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: const Text('Yes, Log Out'),
-                ),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: const Text('Cancel'),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

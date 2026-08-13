@@ -5,11 +5,13 @@ import '../../providers/student_provider.dart';
 import '../../providers/teacher_provider.dart';
 import '../../providers/batch_provider.dart';
 import '../../providers/dashboard_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../student/student_list_screen.dart';
 import '../teacher/teacher_list_screen.dart';
 import '../batch/batch_list_screen.dart';
 import '../attendance/mark_attendance_screen.dart';
 import '../attendance/attendance_history_screen.dart';
+import '../fee/fee_records_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String role;
@@ -28,6 +30,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       Provider.of<TeacherProvider>(context, listen: false).fetchTeachers();
       Provider.of<BatchProvider>(context, listen: false).fetchBatches();
       Provider.of<DashboardProvider>(context, listen: false).fetchSummary();
+      Provider.of<NotificationProvider>(
+        context,
+        listen: false,
+      ).fetchNotifications(widget.role.toLowerCase());
     });
   }
 
@@ -36,6 +42,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     await Provider.of<TeacherProvider>(context, listen: false).fetchTeachers();
     await Provider.of<BatchProvider>(context, listen: false).fetchBatches();
     await Provider.of<DashboardProvider>(context, listen: false).fetchSummary();
+    await Provider.of<NotificationProvider>(
+      context,
+      listen: false,
+    ).fetchNotifications(widget.role.toLowerCase());
   }
 
   IconData _activityIcon(String type) {
@@ -51,6 +61,126 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  void _showNotifications(
+    BuildContext context,
+    NotificationProvider notifProvider,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          constraints: const BoxConstraints(maxHeight: 420),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Notifications',
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const Divider(),
+              Flexible(
+                child: notifProvider.notifications.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 30),
+                        child: Center(
+                          child: Text(
+                            'No notifications yet',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: notifProvider.notifications.length,
+                        itemBuilder: (context, index) {
+                          final n = notifProvider.notifications[index];
+                          final isRead = n['is_read'] == true;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: isRead
+                                  ? Colors.transparent
+                                  : const Color(0xFFE3EEFB),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: isRead
+                                      ? Colors.grey.shade200
+                                      : Colors.white,
+                                  child: Icon(
+                                    _activityIcon(n['related_type'] ?? ''),
+                                    size: 16,
+                                    color: const Color(0xFF16305C),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        n['title'] ?? '',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        n['message'] ?? '',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              if (notifProvider.notifications.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () {
+                        notifProvider.markAllRead(widget.role.toLowerCase());
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Mark all as read'),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -58,6 +188,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final teacherProvider = Provider.of<TeacherProvider>(context);
     final batchProvider = Provider.of<BatchProvider>(context);
     final dashboardProvider = Provider.of<DashboardProvider>(context);
+    final notifProvider = Provider.of<NotificationProvider>(context);
 
     final userName = authProvider.currentUser?.fullName ?? 'Admin';
     final totalStudents = studentProvider.students.length;
@@ -98,12 +229,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         Row(
                           children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.notifications_none,
-                                color: Colors.black,
-                              ),
-                              onPressed: () {},
+                            Stack(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.notifications_none,
+                                    color: Colors.black,
+                                  ),
+                                  onPressed: () => _showNotifications(
+                                    context,
+                                    notifProvider,
+                                  ),
+                                ),
+                                if (notifProvider.unreadCount > 0)
+                                  Positioned(
+                                    right: 6,
+                                    top: 6,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(3),
+                                      constraints: const BoxConstraints(
+                                        minWidth: 16,
+                                        minHeight: 16,
+                                      ),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Text(
+                                        '${notifProvider.unreadCount}',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 9,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                             IconButton(
                               icon: const Icon(
@@ -191,7 +354,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Real-time attendance & fee
                     if (dashboardProvider.isLoading)
                       const Center(
                         child: Padding(
@@ -225,7 +387,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     const SizedBox(height: 20),
 
-                    // Real Recent Activity
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -343,6 +504,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             MaterialPageRoute(builder: (_) => const AttendanceHistoryScreen()),
           );
         }),
+        _quickAction(Icons.receipt_long_outlined, 'Fee Records', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const FeeRecordsScreen()),
+          );
+        }),
       ];
     } else if (role == 'teacher') {
       return [
@@ -382,7 +549,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             MaterialPageRoute(builder: (_) => const AttendanceHistoryScreen()),
           );
         }),
-        _quickAction(Icons.receipt_long_outlined, 'My Fees', () {}),
+        _quickAction(Icons.receipt_long_outlined, 'My Fees', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const FeeRecordsScreen()),
+          );
+        }),
         _quickAction(Icons.groups_2_outlined, 'My Batch', () {
           Navigator.push(
             context,

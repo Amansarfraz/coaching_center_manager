@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import 'constants/app_theme.dart';
 
-// Providers
 import 'providers/auth_provider.dart';
 import 'providers/student_provider.dart';
 import 'providers/teacher_provider.dart';
@@ -11,13 +10,14 @@ import 'providers/batch_provider.dart';
 import 'providers/attendance_provider.dart';
 import 'providers/fee_provider.dart';
 import 'providers/dashboard_provider.dart';
+import 'providers/notification_provider.dart';
+import 'providers/theme_provider.dart';
 
-// Screens
 import 'screens/auth/splash_screen.dart';
 import 'screens/auth/get_started_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/teacher/teacher_list_screen.dart';
-//import 'screens/settings/settings_screen.dart';
+import 'screens/settings/settings_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,18 +38,31 @@ class CoachingCenterApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AttendanceProvider()),
         ChangeNotifierProvider(create: (_) => FeeProvider()),
         ChangeNotifierProvider(create: (_) => DashboardProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Coaching Center Manager',
-        theme: AppTheme.lightTheme,
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const SplashScreen(),
-          '/get_started_screen': (context) => const GetStartedScreen(),
-          '/login_screen': (context) => const LoginScreen(),
-          '/teacher_list_screen': (context) => const TeacherListScreen(),
-          //'/settings_screen': (context) => const SettingsScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Coaching Center Manager',
+            theme: AppTheme.lightTheme,
+            darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
+              scaffoldBackgroundColor: const Color(0xFF121212),
+              primaryColor: const Color(0xFF2F80ED),
+            ),
+            themeMode: themeProvider.isDarkMode
+                ? ThemeMode.dark
+                : ThemeMode.light,
+            initialRoute: '/',
+            routes: {
+              '/': (context) => const SplashScreen(),
+              '/get_started_screen': (context) => const GetStartedScreen(),
+              '/login_screen': (context) => const LoginScreen(),
+              '/teacher_list_screen': (context) => const TeacherListScreen(),
+              '/settings_screen': (context) => const SettingsScreen(),
+            },
+          );
         },
       ),
     );

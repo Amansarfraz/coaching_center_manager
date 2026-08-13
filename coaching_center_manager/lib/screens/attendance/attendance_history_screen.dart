@@ -37,6 +37,37 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     }
   }
 
+  Future<void> _pickBatch() async {
+    final batchProvider = Provider.of<BatchProvider>(context, listen: false);
+    final selected = await showModalBottomSheet<BatchModel>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(16),
+            children: batchProvider.batches
+                .map(
+                  (b) => ListTile(
+                    title: Text(b.batchName),
+                    subtitle: Text(b.teacherName),
+                    onTap: () => Navigator.pop(context, b),
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      },
+    );
+    if (selected != null) {
+      setState(() => _selectedBatch = selected);
+      _fetchHistory();
+    }
+  }
+
   void _fetchHistory() {
     if (_selectedBatch != null) {
       Provider.of<AttendanceProvider>(
@@ -57,6 +88,24 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     }
   }
 
+  String _formatDate(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final batchProvider = Provider.of<BatchProvider>(context);
@@ -68,15 +117,24 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     final absent = records.where((r) => r.status == 'absent').length;
     final leave = records.where((r) => r.status == 'leave').length;
     final presentPct = total == 0 ? 0.0 : (present / total) * 100;
+    final absentPct = total == 0 ? 0.0 : (absent / total) * 100;
+    final leavePct = total == 0 ? 0.0 : (leave / total) * 100;
 
     return Scaffold(
       backgroundColor: const Color(0xFFE8F3FB),
       body: Column(
         children: [
+          // Header — dark navy
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 24),
+            decoration: const BoxDecoration(
+              color: Color(0xFF16305C),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
+              ),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -86,315 +144,534 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                       onTap: () => Navigator.pop(context),
                       child: const Icon(
                         Icons.arrow_back,
-                        color: Colors.black,
+                        color: Colors.white,
                         size: 24,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
                     const Text(
                       'Attendance History',
                       style: TextStyle(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: Colors.black,
+                        color: Colors.white,
                       ),
                     ),
                   ],
                 ),
                 const CircleAvatar(
-                  radius: 16,
+                  radius: 18,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 18, color: Color(0xFF16305C)),
+                  child: Icon(Icons.person, color: Color(0xFF16305C)),
                 ),
               ],
             ),
           ),
-
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: _pickDate,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_today_outlined,
-                            size: 16,
-                            color: Color(0xFF16305C),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<BatchModel>(
-                        value: _selectedBatch,
-                        hint: const Text(
-                          'Select Batch',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        isExpanded: true,
-                        items: batchProvider.batches
-                            .map(
-                              (b) => DropdownMenuItem(
-                                value: b,
-                                child: Text(
-                                  b.batchName,
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() => _selectedBatch = value);
-                          _fetchHistory();
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          if (_selectedBatch != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Total Students: $total',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            height: 80,
-                            width: 80,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                SizedBox(
-                                  height: 80,
-                                  width: 80,
-                                  child: CircularProgressIndicator(
-                                    value: presentPct / 100,
-                                    strokeWidth: 8,
-                                    backgroundColor: const Color(0xFFEFEFEF),
-                                    color: const Color(0xFF27AE60),
-                                  ),
-                                ),
-                                Text(
-                                  '${presentPct.toStringAsFixed(0)}%',
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF16305C),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Present: $present ($total)',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _miniStatCard(
-                          Icons.cancel_outlined,
-                          'Absent: $absent',
-                          const Color(0xFFEB5757),
-                        ),
-                        const SizedBox(height: 8),
-                        _miniStatCard(
-                          Icons.event_busy_outlined,
-                          'On Leave: $leave',
-                          const Color(0xFFF2994A),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          const SizedBox(height: 10),
 
           Expanded(
-            child: _selectedBatch == null
-                ? const Center(
-                    child: Text(
-                      'Select a batch to view attendance history',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  )
-                : attendanceProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : records.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No attendance records for this date',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: records.length,
-                    itemBuilder: (context, index) {
-                      final record = records[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Date Picker + Batch Selector
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                const CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: Color(0xFFE3EEFB),
-                                  child: Icon(
-                                    Icons.person,
-                                    color: Color(0xFF16305C),
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    record.studentName,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _statusColor(record.status),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    record.status[0].toUpperCase() +
-                                        record.status.substring(1),
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            const Text(
+                              'Date Picker',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                color: Color(0xFF16305C),
+                              ),
                             ),
                             const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                _editPill(
-                                  'P',
-                                  record.status == 'present',
-                                  const Color(0xFF27AE60),
-                                  () {
-                                    Provider.of<AttendanceProvider>(
-                                      context,
-                                      listen: false,
-                                    ).updateStatus(record.id, 'present');
-                                  },
+                            InkWell(
+                              onTap: _pickDate,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 14,
                                 ),
-                                _editPill(
-                                  'A',
-                                  record.status == 'absent',
-                                  const Color(0xFFEB5757),
-                                  () {
-                                    Provider.of<AttendanceProvider>(
-                                      context,
-                                      listen: false,
-                                    ).updateStatus(record.id, 'absent');
-                                  },
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
-                                _editPill(
-                                  'L',
-                                  record.status == 'leave',
-                                  const Color(0xFFF2994A),
-                                  () {
-                                    Provider.of<AttendanceProvider>(
-                                      context,
-                                      listen: false,
-                                    ).updateStatus(record.id, 'leave');
-                                  },
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.calendar_today_outlined,
+                                      size: 16,
+                                      color: Color(0xFF16305C),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        _formatDate(_selectedDate),
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.chevron_right,
+                                      size: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
-                      );
-                    },
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Batch Selector',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                color: Color(0xFF16305C),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            InkWell(
+                              onTap: _pickBatch,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        _selectedBatch?.batchName ??
+                                            'Select Batch',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.arrow_drop_down,
+                                      size: 18,
+                                      color: Colors.grey,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
+
+                  const SizedBox(height: 16),
+
+                  if (_selectedBatch == null)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text(
+                          'Select a batch to view attendance history',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    )
+                  else if (attendanceProvider.isLoading)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else ...[
+                    // Total Students + Donut
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE3EEFB),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(
+                                        Icons.groups,
+                                        size: 16,
+                                        color: Color(0xFF2F80ED),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Expanded(
+                                      child: Text(
+                                        'Total Students',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 2,
+                                    bottom: 10,
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      '$total',
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF16305C),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 90,
+                                  width: 90,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      SizedBox(
+                                        height: 90,
+                                        width: 90,
+                                        child: CircularProgressIndicator(
+                                          value: total == 0
+                                              ? 0
+                                              : presentPct / 100,
+                                          strokeWidth: 9,
+                                          backgroundColor: const Color(
+                                            0xFFEFEFEF,
+                                          ),
+                                          color: const Color(0xFF27AE60),
+                                        ),
+                                      ),
+                                      Text(
+                                        '$total',
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xFF16305C),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  'Present: $present (${presentPct.toStringAsFixed(0)}%)',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF27AE60),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              _statBar(
+                                icon: Icons.block,
+                                iconColor: const Color(0xFFEB5757),
+                                iconBg: const Color(0xFFFDE8EA),
+                                title: 'Absent: $absent',
+                                count: absent,
+                                pct: absentPct,
+                                barColor: const Color(0xFFEB5757),
+                              ),
+                              const SizedBox(height: 12),
+                              _statBar(
+                                icon: Icons.beach_access,
+                                iconColor: const Color(0xFFF2994A),
+                                iconBg: const Color(0xFFFFF3E0),
+                                title: 'On Leave: $leave',
+                                count: leave,
+                                pct: leavePct,
+                                barColor: const Color(0xFFF2994A),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Student list
+                    if (records.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 30),
+                        child: Center(
+                          child: Text(
+                            'No attendance record found for this batch on this date.\nMark attendance first from "Record Attendance".',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey, fontSize: 13),
+                          ),
+                        ),
+                      )
+                    else
+                      ...records.map(
+                        (record) => Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              const CircleAvatar(
+                                radius: 22,
+                                backgroundColor: Color(0xFFE3EEFB),
+                                child: Icon(
+                                  Icons.person,
+                                  color: Color(0xFF16305C),
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      record.studentName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: _statusColor(record.status),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        record.status[0].toUpperCase() +
+                                            record.status.substring(1),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              _editPill(
+                                'P',
+                                record.status == 'present',
+                                const Color(0xFF27AE60),
+                                () {
+                                  Provider.of<AttendanceProvider>(
+                                    context,
+                                    listen: false,
+                                  ).updateStatus(record.id, 'present');
+                                },
+                              ),
+                              _editPill(
+                                'A',
+                                record.status == 'absent',
+                                const Color(0xFFEB5757),
+                                () {
+                                  Provider.of<AttendanceProvider>(
+                                    context,
+                                    listen: false,
+                                  ).updateStatus(record.id, 'absent');
+                                },
+                              ),
+                              _editPill(
+                                'L',
+                                record.status == 'leave',
+                                const Color(0xFFF2994A),
+                                () {
+                                  Provider.of<AttendanceProvider>(
+                                    context,
+                                    listen: false,
+                                  ).updateStatus(record.id, 'leave');
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _statBar({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String title,
+    required int count,
+    required double pct,
+    required Color barColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 14, color: iconColor),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 30,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _bar(4, barColor.withOpacity(0.3)),
+                      const SizedBox(width: 3),
+                      _bar(10, barColor.withOpacity(0.3)),
+                      const SizedBox(width: 3),
+                      _bar(24, barColor),
+                      const SizedBox(width: 3),
+                      _bar(14, barColor.withOpacity(0.3)),
+                      const SizedBox(width: 3),
+                      _bar(8, barColor.withOpacity(0.3)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$count\n(${pct.toStringAsFixed(0)}%)',
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bar(double height, Color color) {
+    return Container(
+      width: 8,
+      height: height,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(3),
       ),
     );
   }
@@ -406,48 +683,26 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     VoidCallback onTap,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(left: 6),
+      padding: const EdgeInsets.only(left: 4),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 28,
-          height: 28,
+          width: 26,
+          height: 26,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? color : color.withOpacity(0.1),
+            color: isSelected ? color : color.withOpacity(0.12),
             shape: BoxShape.circle,
           ),
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
               color: isSelected ? Colors.white : color,
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _miniStatCard(IconData icon, String text, Color color) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: 6),
-          Text(
-            text,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }

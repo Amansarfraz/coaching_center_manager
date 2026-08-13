@@ -36,15 +36,18 @@ async def mark_attendance(data: AttendanceMarkSchema):
     return {"message": "Attendance marked successfully"}
 
 
-@router.put("/{attendance_id}")
-async def update_attendance_status(attendance_id: str, status: str):
-    from beanie import PydanticObjectId
-    record = await Attendance.get(PydanticObjectId(attendance_id))
-    if not record:
-        return {"error": "Record not found"}
-    record.status = status
-    await record.save()
-    return record
+@router.get("")
+async def get_attendance_by_date(batch_id: str, date: str):
+    date_obj = datetime.fromisoformat(date)
+    start_of_day = datetime(date_obj.year, date_obj.month, date_obj.day, 0, 0, 0)
+    end_of_day = datetime(date_obj.year, date_obj.month, date_obj.day, 23, 59, 59)
+
+    records = await Attendance.find(
+        Attendance.batch_id == batch_id,
+        Attendance.date >= start_of_day,
+        Attendance.date <= end_of_day,
+    ).to_list()
+    return {"attendance": records}
 
 
 @router.get("/student/{student_id}")

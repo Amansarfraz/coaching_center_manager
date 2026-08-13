@@ -234,7 +234,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Present: $present ($total==0?0:${(present)}/$total)',
+                            'Present: $present ($total)',
                             style: const TextStyle(
                               fontSize: 10,
                               color: Colors.grey,
@@ -255,7 +255,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                         ),
                         const SizedBox(height: 8),
                         _miniStatCard(
-                          Icons.beach_access_outlined,
+                          Icons.event_busy_outlined,
                           'On Leave: $leave',
                           const Color(0xFFF2994A),
                         ),
@@ -304,45 +304,89 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                             ),
                           ],
                         ),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Color(0xFFE3EEFB),
-                              child: Icon(
-                                Icons.person,
-                                color: Color(0xFF16305C),
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                record.studentName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                            Row(
+                              children: [
+                                const CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: Color(0xFFE3EEFB),
+                                  child: Icon(
+                                    Icons.person,
+                                    color: Color(0xFF16305C),
+                                    size: 20,
+                                  ),
                                 ),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _statusColor(record.status),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                record.status[0].toUpperCase() +
-                                    record.status.substring(1),
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    record.studentName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _statusColor(record.status),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    record.status[0].toUpperCase() +
+                                        record.status.substring(1),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                _editPill(
+                                  'P',
+                                  record.status == 'present',
+                                  const Color(0xFF27AE60),
+                                  () {
+                                    Provider.of<AttendanceProvider>(
+                                      context,
+                                      listen: false,
+                                    ).updateStatus(record.id, 'present');
+                                  },
+                                ),
+                                _editPill(
+                                  'A',
+                                  record.status == 'absent',
+                                  const Color(0xFFEB5757),
+                                  () {
+                                    Provider.of<AttendanceProvider>(
+                                      context,
+                                      listen: false,
+                                    ).updateStatus(record.id, 'absent');
+                                  },
+                                ),
+                                _editPill(
+                                  'L',
+                                  record.status == 'leave',
+                                  const Color(0xFFF2994A),
+                                  () {
+                                    Provider.of<AttendanceProvider>(
+                                      context,
+                                      listen: false,
+                                    ).updateStatus(record.id, 'leave');
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -351,6 +395,37 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _editPill(
+    String label,
+    bool isSelected,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected ? color : color.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: isSelected ? Colors.white : color,
+            ),
+          ),
+        ),
       ),
     );
   }

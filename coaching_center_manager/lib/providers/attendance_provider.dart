@@ -131,4 +131,28 @@ class AttendanceProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
   }
+
+  Future<bool> updateStatus(String attendanceId, String status) async {
+    final result = await _attendanceService.updateStatus(attendanceId, status);
+    if (result['success'] == true) {
+      final index = _attendanceRecords.indexWhere((r) => r.id == attendanceId);
+      if (index != -1) {
+        final old = _attendanceRecords[index];
+        _attendanceRecords[index] = AttendanceModel(
+          id: old.id,
+          studentId: old.studentId,
+          studentName: old.studentName,
+          batchId: old.batchId,
+          batchName: old.batchName,
+          date: old.date,
+          status: status,
+          markedBy: old.markedBy,
+          createdAt: old.createdAt,
+        );
+        notifyListeners();
+      }
+      return true;
+    }
+    return false;
+  }
 }

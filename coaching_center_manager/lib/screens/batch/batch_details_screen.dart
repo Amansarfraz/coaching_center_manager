@@ -32,7 +32,7 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
     final attendanceProvider = Provider.of<AttendanceProvider>(context);
 
     final studentCount = studentProvider.students
-        .where((s) => s.batchName == widget.batch.batchName)
+        .where((s) => s.batchId == widget.batch.id)
         .length;
 
     final summary = attendanceProvider.batchSummary;

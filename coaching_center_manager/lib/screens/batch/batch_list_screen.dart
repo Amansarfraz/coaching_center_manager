@@ -33,9 +33,7 @@ class _BatchListScreenState extends State<BatchListScreen> {
   }
 
   int _studentCountForBatch(BatchModel batch, StudentProvider studentProvider) {
-    return studentProvider.students
-        .where((s) => s.batchName == batch.batchName)
-        .length;
+    return studentProvider.students.where((s) => s.batchId == batch.id).length;
   }
 
   @override

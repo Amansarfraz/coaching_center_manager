@@ -48,6 +48,7 @@ async def create_student(data: StudentCreateSchema):
         batch_id=data.batch_id,
         batch_name=data.batch_name,
         monthly_fee=data.monthly_fee,
+        profile_image=data.profile_image,
     )
     await student.insert()
     return student

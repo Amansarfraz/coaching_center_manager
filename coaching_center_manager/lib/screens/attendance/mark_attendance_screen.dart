@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/batch_provider.dart';
 import '../../providers/student_provider.dart';
 import '../../providers/attendance_provider.dart';
 import '../../models/batch_model.dart';
+import '../../models/student_model.dart';
 
 class MarkAttendanceScreen extends StatefulWidget {
   const MarkAttendanceScreen({super.key});
@@ -36,6 +38,32 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
+  Future<void> _pickBatch() async {
+    final batchProvider = Provider.of<BatchProvider>(context, listen: false);
+    final selected = await showModalBottomSheet<BatchModel>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(16),
+          children: batchProvider.batches
+              .map(
+                (b) => ListTile(
+                  title: Text(b.batchName),
+                  subtitle: Text(b.teacherName),
+                  onTap: () => Navigator.pop(context, b),
+                ),
+              )
+              .toList(),
+        );
+      },
+    );
+    if (selected != null) setState(() => _selectedBatch = selected);
+  }
+
   Future<void> _submitAttendance() async {
     if (_selectedBatch == null) {
       ScaffoldMessenger.of(
@@ -54,7 +82,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
     );
 
     final batchStudents = studentProvider.students
-        .where((s) => s.batchName == _selectedBatch!.batchName)
+        .where((s) => s.batchId == _selectedBatch!.id)
         .toList();
 
     if (batchStudents.isEmpty) {
@@ -96,29 +124,49 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
     }
   }
 
+  ImageProvider? _getStudentImage(StudentModel student) {
+    final img = student.profileImage;
+    if (img != null && img.isNotEmpty) {
+      try {
+        return MemoryImage(base64Decode(img));
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   Widget _pillButton(
     String studentId,
     String status,
     String label,
+    IconData icon,
     Color color,
   ) {
     final isSelected = (_statusMap[studentId] ?? 'present') == status;
     return GestureDetector(
       onTap: () => setState(() => _statusMap[studentId] = status),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         margin: const EdgeInsets.only(left: 4),
         decoration: BoxDecoration(
           color: isSelected ? color : color.withOpacity(0.08),
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: isSelected ? Colors.white : color,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: isSelected ? Colors.white : color),
+            const SizedBox(width: 3),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: isSelected ? Colors.white : color,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -126,14 +174,13 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final batchProvider = Provider.of<BatchProvider>(context);
     final studentProvider = Provider.of<StudentProvider>(context);
     final attendanceProvider = Provider.of<AttendanceProvider>(context);
 
     final batchStudents = _selectedBatch == null
-        ? <dynamic>[]
+        ? <StudentModel>[]
         : studentProvider.students
-              .where((s) => s.batchName == _selectedBatch!.batchName)
+              .where((s) => s.batchId == _selectedBatch!.id)
               .toList();
 
     return Scaffold(
@@ -144,8 +191,8 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
             decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
@@ -162,81 +209,78 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                       'Mark Attendance',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
-                        fontSize: 22,
+                        fontSize: 20,
                         color: Colors.black,
                       ),
                     ),
                   ],
                 ),
-                if (_selectedBatch != null)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40, top: 4),
-                    child: Text(
-                      '${_selectedBatch!.batchName}  •  ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
+                const CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.search, size: 18, color: Color(0xFF16305C)),
+                ),
               ],
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: _pickBatch,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<BatchModel>(
-                        value: _selectedBatch,
-                        hint: const Text(
-                          'Select Batch',
-                          style: TextStyle(fontSize: 13),
-                        ),
-                        isExpanded: true,
-                        items: batchProvider.batches
-                            .map(
-                              (b) => DropdownMenuItem(
-                                value: b,
-                                child: Text(b.batchName),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) =>
-                            setState(() => _selectedBatch = value),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Batch: ${_selectedBatch?.batchName ?? "Tap to select"}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: Color(0xFF16305C),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Date: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                    InkWell(
+                      onTap: _pickDate,
+                      child: const Icon(
+                        Icons.calendar_today_outlined,
+                        size: 20,
+                        color: Color(0xFF16305C),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                InkWell(
-                  onTap: _pickDate,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.calendar_today_outlined,
-                      size: 20,
-                      color: Color(0xFF16305C),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
+
           Expanded(
             child: _selectedBatch == null
                 ? const Center(
@@ -257,6 +301,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                     itemCount: batchStudents.length,
                     itemBuilder: (context, index) {
                       final student = batchStudents[index];
+                      final image = _getStudentImage(student);
                       return Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(12),
@@ -273,14 +318,17 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                         ),
                         child: Row(
                           children: [
-                            const CircleAvatar(
+                            CircleAvatar(
                               radius: 20,
-                              backgroundColor: Color(0xFFE3EEFB),
-                              child: Icon(
-                                Icons.person,
-                                color: Color(0xFF16305C),
-                                size: 20,
-                              ),
+                              backgroundColor: const Color(0xFFE3EEFB),
+                              backgroundImage: image,
+                              child: image == null
+                                  ? const Icon(
+                                      Icons.person,
+                                      color: Color(0xFF16305C),
+                                      size: 20,
+                                    )
+                                  : null,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
@@ -297,18 +345,21 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                               student.id,
                               'present',
                               'Present',
+                              Icons.check,
                               const Color(0xFF27AE60),
                             ),
                             _pillButton(
                               student.id,
                               'absent',
                               'Absent',
+                              Icons.close,
                               const Color(0xFFEB5757),
                             ),
                             _pillButton(
                               student.id,
                               'leave',
                               'Leave',
+                              Icons.calendar_today,
                               const Color(0xFFF2994A),
                             ),
                           ],

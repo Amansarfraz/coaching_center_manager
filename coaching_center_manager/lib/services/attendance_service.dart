@@ -114,4 +114,21 @@ class AttendanceService {
       return {'success': false, 'message': 'Something went wrong.'};
     }
   }
+
+  Future<Map<String, dynamic>> updateStatus(
+    String attendanceId,
+    String status,
+  ) async {
+    try {
+      final response = await _apiService.dio.put(
+        '/attendance/$attendanceId',
+        queryParameters: {'status': status},
+      );
+      return {'success': true, 'record': response.data};
+    } on DioException catch (e) {
+      return {'success': false, 'message': _handleError(e)};
+    } catch (e) {
+      return {'success': false, 'message': 'Something went wrong.'};
+    }
+  }
 }

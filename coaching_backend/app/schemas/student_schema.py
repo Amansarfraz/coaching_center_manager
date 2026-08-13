@@ -14,6 +14,7 @@ class StudentCreateSchema(BaseModel):
     batch_id: str
     batch_name: str
     monthly_fee: float
+    profile_image: Optional[str] = None
 
 
 class StudentUpdateSchema(BaseModel):
@@ -29,3 +30,4 @@ class StudentUpdateSchema(BaseModel):
     batch_name: Optional[str] = None
     monthly_fee: Optional[float] = None
     status: Optional[str] = None
+    profile_image: Optional[str] = None

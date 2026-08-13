@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
+import '../../providers/batch_provider.dart';
 import '../../models/student_model.dart';
 
 class StudentAddScreen extends StatefulWidget {
@@ -23,11 +24,11 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
   final _monthlyFeeController = TextEditingController();
-  final _batchNameController = TextEditingController();
 
   String? _selectedGender;
   DateTime? _dob;
   DateTime? _admissionDate;
+  String? _selectedBatchId;
 
   Uint8List? _pickedImageBytes;
   String? _existingImageBase64;
@@ -37,6 +38,11 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<BatchProvider>(context, listen: false).fetchBatches();
+    });
+
     if (_isEditMode) {
       final s = widget.studentToEdit!;
       _fullNameController.text = s.fullName;
@@ -45,10 +51,10 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       _emailController.text = s.email;
       _addressController.text = s.homeAddress;
       _monthlyFeeController.text = s.monthlyFee.toString();
-      _batchNameController.text = s.batchName;
       _selectedGender = s.gender;
       _dob = s.dob;
       _admissionDate = s.admissionDate;
+      _selectedBatchId = s.batchId;
       _existingImageBase64 = s.profileImage;
     }
   }
@@ -61,7 +67,6 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
     _emailController.dispose();
     _addressController.dispose();
     _monthlyFeeController.dispose();
-    _batchNameController.dispose();
     super.dispose();
   }
 
@@ -74,9 +79,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
     );
     if (pickedFile != null) {
       final bytes = await pickedFile.readAsBytes();
-      setState(() {
-        _pickedImageBytes = bytes;
-      });
+      setState(() => _pickedImageBytes = bytes);
     }
   }
 
@@ -106,9 +109,14 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
   Future<void> _saveStudent() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_selectedGender == null || _dob == null || _admissionDate == null) {
+    if (_selectedGender == null ||
+        _dob == null ||
+        _admissionDate == null ||
+        _selectedBatchId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields')),
+        const SnackBar(
+          content: Text('Please fill all required fields (including Batch)'),
+        ),
       );
       return;
     }
@@ -117,7 +125,10 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       context,
       listen: false,
     );
-    final batchNameValue = _batchNameController.text.trim();
+    final batchProvider = Provider.of<BatchProvider>(context, listen: false);
+    final selectedBatch = batchProvider.batches.firstWhere(
+      (b) => b.id == _selectedBatchId,
+    );
 
     String? imageBase64 = _existingImageBase64;
     if (_pickedImageBytes != null) {
@@ -133,8 +144,8 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
       'gender': _selectedGender,
       'dob': _dob!.toIso8601String(),
       'admission_date': _admissionDate!.toIso8601String(),
-      'batch_id': batchNameValue,
-      'batch_name': batchNameValue,
+      'batch_id': _selectedBatchId,
+      'batch_name': selectedBatch.batchName,
       'monthly_fee': double.tryParse(_monthlyFeeController.text.trim()) ?? 0,
       'profile_image': imageBase64,
     };
@@ -193,6 +204,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
   @override
   Widget build(BuildContext context) {
     final studentProvider = Provider.of<StudentProvider>(context);
+    final batchProvider = Provider.of<BatchProvider>(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFE8F3FB),
@@ -409,13 +421,42 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                       ],
                     ),
 
-                    _label('Batch Name:'),
-                    TextFormField(
-                      controller: _batchNameController,
-                      decoration: _fieldDecoration('e.g. Batch-A Morning'),
-                      validator: (v) =>
-                          v == null || v.isEmpty ? 'Required' : null,
-                    ),
+                    _label('Batch:'),
+                    batchProvider.isLoading
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            child: LinearProgressIndicator(),
+                          )
+                        : batchProvider.batches.isEmpty
+                        ? Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text(
+                              'No batches available. Please create a batch first from Batches screen.',
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            ),
+                          )
+                        : DropdownButtonFormField<String>(
+                            value: _selectedBatchId,
+                            decoration: _fieldDecoration('Select batch'),
+                            isExpanded: true,
+                            items: batchProvider.batches
+                                .map(
+                                  (b) => DropdownMenuItem(
+                                    value: b.id,
+                                    child: Text(
+                                      b.batchName,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) =>
+                                setState(() => _selectedBatchId = value),
+                          ),
 
                     _label('Monthly Fee:'),
                     TextFormField(
@@ -481,7 +522,6 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 20),
                   ],
                 ),

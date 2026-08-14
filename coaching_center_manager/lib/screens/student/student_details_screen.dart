@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/student_provider.dart';
 import '../../models/student_model.dart';
 import 'student_add_screen.dart';
@@ -9,7 +10,8 @@ class StudentDetailsScreen extends StatelessWidget {
   final StudentModel student;
   const StudentDetailsScreen({super.key, required this.student});
 
-  Widget _sectionCard({
+  Widget _sectionCard(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required List<Widget> children,
@@ -19,7 +21,7 @@ class StudentDetailsScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppDynamicColors.cardBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -38,10 +40,10 @@ class StudentDetailsScreen extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
-                  color: Color(0xFF16305C),
+                  color: AppDynamicColors.primaryText(context),
                 ),
               ),
             ],
@@ -53,17 +55,20 @@ class StudentDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoRow(IconData icon, String value) {
+  Widget _infoRow(BuildContext context, IconData icon, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Colors.grey.shade600),
+          Icon(icon, size: 18, color: AppDynamicColors.secondaryText(context)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 15, color: Colors.black87),
+              style: TextStyle(
+                fontSize: 15,
+                color: AppDynamicColors.primaryText(context),
+              ),
             ),
           ),
         ],
@@ -86,32 +91,38 @@ class StudentDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final image = _getStudentImage();
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+    final cardColor = AppDynamicColors.cardBg(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
-                    color: Colors.black,
+                    color: headerTextColor,
                     size: 24,
                   ),
                 ),
                 const SizedBox(width: 16),
-                const Text(
+                Text(
                   'Student Details',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 22,
-                    color: Colors.black,
+                    color: headerTextColor,
                   ),
                 ),
               ],
@@ -152,10 +163,10 @@ class StudentDetailsScreen extends StatelessWidget {
 
                   Text(
                     student.fullName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 22,
-                      color: Colors.black,
+                      color: primaryTextColor,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -165,19 +176,22 @@ class StudentDetailsScreen extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _sectionCard(
+                      context,
                       icon: Icons.person_outline,
                       title: 'Personal Info',
                       children: [
-                        _infoRow(Icons.phone, student.phone),
+                        _infoRow(context, Icons.phone, student.phone),
                         _infoRow(
+                          context,
                           Icons.email_outlined,
                           student.email.isEmpty ? '-' : student.email,
                         ),
                         _infoRow(
+                          context,
                           Icons.escalator_warning_outlined,
                           "Father: ${student.fatherName}",
                         ),
-                        _infoRow(Icons.wc_outlined, student.gender),
+                        _infoRow(context, Icons.wc_outlined, student.gender),
                       ],
                     ),
                   ),
@@ -185,6 +199,7 @@ class StudentDetailsScreen extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _sectionCard(
+                      context,
                       icon: Icons.home_outlined,
                       title: 'Home Address',
                       children: [
@@ -192,9 +207,9 @@ class StudentDetailsScreen extends StatelessWidget {
                           student.homeAddress.isEmpty
                               ? '-'
                               : student.homeAddress,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            color: Colors.black87,
+                            color: primaryTextColor,
                           ),
                         ),
                       ],
@@ -204,22 +219,23 @@ class StudentDetailsScreen extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _sectionCard(
+                      context,
                       icon: Icons.school_outlined,
                       title: 'Academic Info',
                       children: [
                         Text(
                           'Batch: ${student.batchName}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            color: Colors.black87,
+                            color: primaryTextColor,
                           ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'Date of Birth: ${student.dob.day}/${student.dob.month}/${student.dob.year}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            color: Colors.black87,
+                            color: primaryTextColor,
                           ),
                         ),
                       ],
@@ -234,7 +250,7 @@ class StudentDetailsScreen extends StatelessWidget {
                           margin: const EdgeInsets.only(bottom: 16, right: 8),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cardColor,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -248,19 +264,19 @@ class StudentDetailsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                children: const [
-                                  Icon(
+                                children: [
+                                  const Icon(
                                     Icons.attach_money,
                                     size: 20,
                                     color: Color(0xFF16305C),
                                   ),
-                                  SizedBox(width: 6),
+                                  const SizedBox(width: 6),
                                   Text(
                                     'Fee Info',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 15,
-                                      color: Color(0xFF16305C),
+                                      color: primaryTextColor,
                                     ),
                                   ),
                                 ],
@@ -268,9 +284,9 @@ class StudentDetailsScreen extends StatelessWidget {
                               const SizedBox(height: 10),
                               Text(
                                 'Monthly: Rs.${student.monthlyFee.toStringAsFixed(0)}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.black87,
+                                  color: primaryTextColor,
                                 ),
                               ),
                             ],
@@ -282,7 +298,7 @@ class StudentDetailsScreen extends StatelessWidget {
                           margin: const EdgeInsets.only(bottom: 16, left: 8),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cardColor,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -296,19 +312,19 @@ class StudentDetailsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                children: const [
-                                  Icon(
+                                children: [
+                                  const Icon(
                                     Icons.calendar_today_outlined,
                                     size: 18,
                                     color: Color(0xFF16305C),
                                   ),
-                                  SizedBox(width: 6),
+                                  const SizedBox(width: 6),
                                   Text(
                                     'Admission',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 15,
-                                      color: Color(0xFF16305C),
+                                      color: primaryTextColor,
                                     ),
                                   ),
                                 ],
@@ -316,9 +332,9 @@ class StudentDetailsScreen extends StatelessWidget {
                               const SizedBox(height: 10),
                               Text(
                                 '${student.admissionDate.day}/${student.admissionDate.month}/${student.admissionDate.year}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.black87,
+                                  color: primaryTextColor,
                                 ),
                               ),
                             ],

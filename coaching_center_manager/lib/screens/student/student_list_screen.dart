@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/student_provider.dart';
 import '../../models/student_model.dart';
 import 'student_add_screen.dart';
@@ -47,31 +48,39 @@ class _StudentListScreenState extends State<StudentListScreen> {
     final studentProvider = Provider.of<StudentProvider>(context);
     final students = studentProvider.students;
 
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final cardColor = AppDynamicColors.cardBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+    final inputFillColor = AppDynamicColors.inputFill(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
-                    color: Colors.black,
+                    color: headerTextColor,
                     size: 24,
                   ),
                 ),
                 const SizedBox(width: 16),
-                const Text(
+                Text(
                   'Student List',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 22,
-                    color: Colors.black,
+                    color: headerTextColor,
                   ),
                 ),
               ],
@@ -82,7 +91,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
             padding: const EdgeInsets.all(16),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: inputFillColor,
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
@@ -94,13 +103,18 @@ class _StudentListScreenState extends State<StudentListScreen> {
               ),
               child: TextField(
                 controller: _searchController,
+                style: TextStyle(color: primaryTextColor),
                 onChanged: (value) => studentProvider.searchStudents(value),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search students by name, batch or ID...',
-                  hintStyle: TextStyle(fontSize: 13),
-                  prefixIcon: Icon(Icons.search, size: 20),
+                  hintStyle: TextStyle(fontSize: 13, color: secondaryTextColor),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 20,
+                    color: secondaryTextColor,
+                  ),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
@@ -110,10 +124,10 @@ class _StudentListScreenState extends State<StudentListScreen> {
             child: studentProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : students.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'No students found',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: secondaryTextColor),
                     ),
                   )
                 : RefreshIndicator(
@@ -123,7 +137,14 @@ class _StudentListScreenState extends State<StudentListScreen> {
                       itemCount: students.length,
                       itemBuilder: (context, index) {
                         final student = students[index];
-                        return _studentCard(context, student, studentProvider);
+                        return _studentCard(
+                          context,
+                          student,
+                          studentProvider,
+                          cardColor,
+                          primaryTextColor,
+                          secondaryTextColor,
+                        );
                       },
                     ),
                   ),
@@ -188,6 +209,9 @@ class _StudentListScreenState extends State<StudentListScreen> {
     BuildContext context,
     StudentModel student,
     StudentProvider provider,
+    Color cardColor,
+    Color primaryTextColor,
+    Color secondaryTextColor,
   ) {
     final image = _getStudentImage(student);
 
@@ -195,7 +219,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -225,15 +249,16 @@ class _StudentListScreenState extends State<StudentListScreen> {
                   children: [
                     Text(
                       student.fullName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
+                        color: primaryTextColor,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Batch-${student.batchName}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      style: TextStyle(fontSize: 12, color: secondaryTextColor),
                     ),
                   ],
                 ),
@@ -242,7 +267,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
                 icon: const Icon(
                   Icons.search,
                   size: 20,
-                  color: Color(0xFF16305C),
+                  color: Color(0xFF2F80ED),
                 ),
                 onPressed: () {
                   Navigator.push(
@@ -258,11 +283,11 @@ class _StudentListScreenState extends State<StudentListScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.phone, size: 14, color: Colors.grey),
+              Icon(Icons.phone, size: 14, color: secondaryTextColor),
               const SizedBox(width: 6),
               Text(
                 student.phone,
-                style: const TextStyle(fontSize: 13, color: Colors.grey),
+                style: TextStyle(fontSize: 13, color: secondaryTextColor),
               ),
             ],
           ),

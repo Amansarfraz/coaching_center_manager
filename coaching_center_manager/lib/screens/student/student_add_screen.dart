@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/student_provider.dart';
 import '../../providers/batch_provider.dart';
 import '../../models/student_model.dart';
@@ -173,12 +174,15 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
     }
   }
 
-  InputDecoration _fieldDecoration(String hint) {
+  InputDecoration _fieldDecoration(BuildContext context, String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+      hintStyle: TextStyle(
+        color: AppDynamicColors.secondaryText(context),
+        fontSize: 13,
+      ),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppDynamicColors.inputFill(context),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
@@ -187,15 +191,15 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
     );
   }
 
-  Widget _label(String text) {
+  Widget _label(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6, top: 14),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 14,
-          color: Color(0xFF16305C),
+          color: AppDynamicColors.primaryText(context),
         ),
       ),
     );
@@ -206,31 +210,36 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
     final studentProvider = Provider.of<StudentProvider>(context);
     final batchProvider = Provider.of<BatchProvider>(context);
 
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
-                    color: Colors.black,
+                    color: headerTextColor,
                     size: 24,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Text(
                   _isEditMode ? 'Edit Student' : 'Add New Student',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 22,
-                    color: Colors.black,
+                    color: headerTextColor,
                   ),
                 ),
               ],
@@ -297,48 +306,58 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    _label('Full Name:'),
+                    _label(context, 'Full Name:'),
                     TextFormField(
                       controller: _fullNameController,
-                      decoration: _fieldDecoration('Enter full name'),
+                      style: TextStyle(color: primaryTextColor),
+                      decoration: _fieldDecoration(context, 'Enter full name'),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
 
-                    _label("Father's Name:"),
+                    _label(context, "Father's Name:"),
                     TextFormField(
                       controller: _fatherNameController,
-                      decoration: _fieldDecoration('Enter father name'),
+                      style: TextStyle(color: primaryTextColor),
+                      decoration: _fieldDecoration(
+                        context,
+                        'Enter father name',
+                      ),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
 
-                    _label('Phone Number:'),
+                    _label(context, 'Phone Number:'),
                     TextFormField(
                       controller: _phoneController,
+                      style: TextStyle(color: primaryTextColor),
                       keyboardType: TextInputType.phone,
-                      decoration: _fieldDecoration('Enter number'),
+                      decoration: _fieldDecoration(context, 'Enter number'),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
 
-                    _label('Email:'),
+                    _label(context, 'Email:'),
                     TextFormField(
                       controller: _emailController,
+                      style: TextStyle(color: primaryTextColor),
                       keyboardType: TextInputType.emailAddress,
-                      decoration: _fieldDecoration('Enter email'),
+                      decoration: _fieldDecoration(context, 'Enter email'),
                     ),
 
-                    _label('Home Address:'),
+                    _label(context, 'Home Address:'),
                     TextFormField(
                       controller: _addressController,
-                      decoration: _fieldDecoration('Enter address'),
+                      style: TextStyle(color: primaryTextColor),
+                      decoration: _fieldDecoration(context, 'Enter address'),
                     ),
 
-                    _label('Gender:'),
+                    _label(context, 'Gender:'),
                     DropdownButtonFormField<String>(
                       value: _selectedGender,
-                      decoration: _fieldDecoration('Select gender'),
+                      dropdownColor: AppDynamicColors.cardBg(context),
+                      style: TextStyle(color: primaryTextColor),
+                      decoration: _fieldDecoration(context, 'Select gender'),
                       items: const [
                         DropdownMenuItem(value: 'male', child: Text('Male')),
                         DropdownMenuItem(
@@ -357,7 +376,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _label('DOB:'),
+                              _label(context, 'DOB:'),
                               InkWell(
                                 onTap: () => _pickDate(isDob: true),
                                 child: Container(
@@ -366,7 +385,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                                     vertical: 14,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: AppDynamicColors.inputFill(context),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
@@ -375,8 +394,10 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                                         : _formatDate(_dob),
                                     style: TextStyle(
                                       color: _dob == null
-                                          ? Colors.grey
-                                          : Colors.black,
+                                          ? AppDynamicColors.secondaryText(
+                                              context,
+                                            )
+                                          : primaryTextColor,
                                       fontSize: 13,
                                     ),
                                   ),
@@ -390,7 +411,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _label('Admission Date:'),
+                              _label(context, 'Admission Date:'),
                               InkWell(
                                 onTap: () => _pickDate(isDob: false),
                                 child: Container(
@@ -399,7 +420,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                                     vertical: 14,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: AppDynamicColors.inputFill(context),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
@@ -408,8 +429,10 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                                         : _formatDate(_admissionDate),
                                     style: TextStyle(
                                       color: _admissionDate == null
-                                          ? Colors.grey
-                                          : Colors.black,
+                                          ? AppDynamicColors.secondaryText(
+                                              context,
+                                            )
+                                          : primaryTextColor,
                                       fontSize: 13,
                                     ),
                                   ),
@@ -421,7 +444,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                       ],
                     ),
 
-                    _label('Batch:'),
+                    _label(context, 'Batch:'),
                     batchProvider.isLoading
                         ? const Padding(
                             padding: EdgeInsets.symmetric(vertical: 10),
@@ -431,7 +454,7 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                         ? Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppDynamicColors.inputFill(context),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Text(
@@ -441,7 +464,12 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                           )
                         : DropdownButtonFormField<String>(
                             value: _selectedBatchId,
-                            decoration: _fieldDecoration('Select batch'),
+                            dropdownColor: AppDynamicColors.cardBg(context),
+                            style: TextStyle(color: primaryTextColor),
+                            decoration: _fieldDecoration(
+                              context,
+                              'Select batch',
+                            ),
                             isExpanded: true,
                             items: batchProvider.batches
                                 .map(
@@ -458,11 +486,12 @@ class _StudentAddScreenState extends State<StudentAddScreen> {
                                 setState(() => _selectedBatchId = value),
                           ),
 
-                    _label('Monthly Fee:'),
+                    _label(context, 'Monthly Fee:'),
                     TextFormField(
                       controller: _monthlyFeeController,
+                      style: TextStyle(color: primaryTextColor),
                       keyboardType: TextInputType.number,
-                      decoration: _fieldDecoration('Monthly fee'),
+                      decoration: _fieldDecoration(context, 'Monthly fee'),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/theme_provider.dart';
 import 'logout_screen.dart';
 
@@ -10,27 +11,34 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final cardColor = AppDynamicColors.cardBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.arrow_back, color: Colors.black),
+                  child: Icon(Icons.arrow_back, color: headerTextColor),
                 ),
                 const SizedBox(width: 16),
-                const Text(
+                Text(
                   'Setting',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 22,
-                    color: Colors.black,
+                    color: headerTextColor,
                   ),
                 ),
               ],
@@ -45,7 +53,7 @@ class SettingsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
@@ -57,12 +65,9 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.nightlight_round,
-                          color: Color(0xFF16305C),
-                        ),
+                        Icon(Icons.nightlight_round, color: primaryTextColor),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -71,13 +76,14 @@ class SettingsScreen extends StatelessWidget {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,
+                                  color: primaryTextColor,
                                 ),
                               ),
                               Text(
                                 'Switch to dark theme',
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: Colors.grey,
+                                  color: secondaryTextColor,
                                 ),
                               ),
                             ],
@@ -103,7 +109,7 @@ class SettingsScreen extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardColor,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: const Color(0xFFEB5757).withOpacity(0.3),
@@ -123,7 +129,7 @@ class SettingsScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const Icon(Icons.chevron_right, color: Colors.grey),
+                          Icon(Icons.chevron_right, color: secondaryTextColor),
                         ],
                       ),
                     ),
@@ -138,12 +144,12 @@ class SettingsScreen extends StatelessWidget {
                           height: 60,
                         ),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           'COACHING CENTER',
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 12,
-                            color: Color(0xFF16305C),
+                            color: primaryTextColor,
                           ),
                         ),
                         const Text(

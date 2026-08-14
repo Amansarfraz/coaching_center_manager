@@ -8,29 +8,24 @@ class AppTheme {
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
-    scaffoldBackgroundColor: AppColors.scaffoldBackground,
+    brightness: Brightness.light,
+    scaffoldBackgroundColor: const Color(0xFFE8F3FB),
     primaryColor: AppColors.primary,
-
+    cardColor: Colors.white,
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
+      brightness: Brightness.light,
       primary: AppColors.primary,
       secondary: AppColors.secondary,
       error: AppColors.error,
-      surface: AppColors.surface,
+      surface: Colors.white,
     ),
-
     appBarTheme: const AppBarTheme(
       centerTitle: true,
       elevation: 0,
-      backgroundColor: AppColors.primary,
-      foregroundColor: AppColors.textOnPrimary,
-      titleTextStyle: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textOnPrimary,
-      ),
+      backgroundColor: Color(0xFF86BFE2),
+      foregroundColor: Colors.black,
     ),
-
     textTheme: const TextTheme(
       headlineMedium: AppTextStyles.heading1,
       titleLarge: AppTextStyles.heading2,
@@ -39,57 +34,59 @@ class AppTheme {
       bodyMedium: AppTextStyles.bodyMedium,
       bodySmall: AppTextStyles.caption,
     ),
+  );
 
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textOnPrimary,
-        minimumSize: const Size(double.infinity, AppDimens.buttonHeight),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusM),
-        ),
-        textStyle: AppTextStyles.buttonText,
-        elevation: 0,
-      ),
+  static ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: const Color(0xFF121212),
+    primaryColor: AppColors.primary,
+    cardColor: const Color(0xFF1E1E1E),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      brightness: Brightness.dark,
+      primary: AppColors.primary,
+      secondary: AppColors.secondary,
+      error: AppColors.error,
+      surface: const Color(0xFF1E1E1E),
     ),
-
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: AppColors.surface,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppDimens.paddingM,
-        vertical: AppDimens.paddingM,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppDimens.radiusM),
-        borderSide: const BorderSide(color: AppColors.border),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppDimens.radiusM),
-        borderSide: const BorderSide(color: AppColors.border),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppDimens.radiusM),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppDimens.radiusM),
-        borderSide: const BorderSide(color: AppColors.error),
-      ),
-      hintStyle: AppTextStyles.bodyMedium,
+    appBarTheme: const AppBarTheme(
+      centerTitle: true,
+      elevation: 0,
+      backgroundColor: Color(0xFF1B3A5C),
+      foregroundColor: Colors.white,
     ),
-
-    cardTheme: CardThemeData(
-      color: AppColors.cardBackground,
-      elevation: AppDimens.elevationS,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimens.radiusM),
+    textTheme: const TextTheme(
+      headlineMedium: TextStyle(
+        fontSize: 26,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
       ),
-    ),
-
-    dividerTheme: const DividerThemeData(
-      color: AppColors.divider,
-      thickness: 1,
+      titleLarge: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: Colors.white,
+      ),
+      titleMedium: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.white,
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w400,
+        color: Colors.white,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        color: Colors.white70,
+      ),
+      bodySmall: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+        color: Colors.white60,
+      ),
     ),
   );
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/teacher_provider.dart';
 import '../../models/teacher_model.dart';
 import 'teacher_add_screen.dart';
@@ -9,7 +10,8 @@ class TeacherDetailsScreen extends StatelessWidget {
   final TeacherModel teacher;
   const TeacherDetailsScreen({super.key, required this.teacher});
 
-  Widget _sectionCard({
+  Widget _sectionCard(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required List<Widget> children,
@@ -19,7 +21,7 @@ class TeacherDetailsScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppDynamicColors.cardBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -38,10 +40,10 @@ class TeacherDetailsScreen extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
-                  color: Color(0xFF16305C),
+                  color: AppDynamicColors.primaryText(context),
                 ),
               ),
             ],
@@ -53,17 +55,20 @@ class TeacherDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoRow(IconData icon, String value) {
+  Widget _infoRow(BuildContext context, IconData icon, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Colors.grey.shade600),
+          Icon(icon, size: 18, color: AppDynamicColors.secondaryText(context)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 15, color: Colors.black87),
+              style: TextStyle(
+                fontSize: 15,
+                color: AppDynamicColors.primaryText(context),
+              ),
             ),
           ),
         ],
@@ -85,33 +90,37 @@ class TeacherDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final image = _getTeacherImage();
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final cardColor = AppDynamicColors.cardBg(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
-          // Header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
-                    color: Colors.black,
+                    color: headerTextColor,
                     size: 24,
                   ),
                 ),
                 const SizedBox(width: 16),
-                const Text(
+                Text(
                   'Teacher Details',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 22,
-                    color: Colors.black,
+                    color: headerTextColor,
                   ),
                 ),
               ],
@@ -124,7 +133,6 @@ class TeacherDetailsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Profile photo
                   Container(
                     width: 150,
                     height: 150,
@@ -153,25 +161,26 @@ class TeacherDetailsScreen extends StatelessWidget {
 
                   Text(
                     '${teacher.fullName} (${teacher.qualification})',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 20,
-                      color: Colors.black,
+                      color: primaryTextColor,
                     ),
                     textAlign: TextAlign.center,
                   ),
 
                   const SizedBox(height: 20),
 
-                  // Personal Info
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _sectionCard(
+                      context,
                       icon: Icons.person_outline,
                       title: 'Personal Info',
                       children: [
-                        _infoRow(Icons.phone, teacher.phone),
+                        _infoRow(context, Icons.phone, teacher.phone),
                         _infoRow(
+                          context,
                           Icons.email_outlined,
                           teacher.email.isEmpty ? '-' : teacher.email,
                         ),
@@ -179,28 +188,28 @@ class TeacherDetailsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Qualifications
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _sectionCard(
+                      context,
                       icon: Icons.school_outlined,
                       title: 'Qualifications',
                       children: [
                         Text(
                           teacher.qualification,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            color: Colors.black87,
+                            color: primaryTextColor,
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  // Assigned Subjects
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _sectionCard(
+                      context,
                       icon: Icons.menu_book_outlined,
                       title: 'Assigned Subjects',
                       children: [
@@ -210,16 +219,15 @@ class TeacherDetailsScreen extends StatelessWidget {
                               : teacher.assignedSubjects
                                     .map((s) => '[$s]')
                                     .join(' '),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            color: Colors.black87,
+                            color: primaryTextColor,
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  // Salary + Joining Date (side by side)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -228,7 +236,7 @@ class TeacherDetailsScreen extends StatelessWidget {
                           margin: const EdgeInsets.only(bottom: 16, right: 8),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cardColor,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -242,19 +250,19 @@ class TeacherDetailsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                children: const [
-                                  Icon(
+                                children: [
+                                  const Icon(
                                     Icons.attach_money,
                                     size: 20,
                                     color: Color(0xFF16305C),
                                   ),
-                                  SizedBox(width: 6),
+                                  const SizedBox(width: 6),
                                   Text(
                                     'Salary Info',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 15,
-                                      color: Color(0xFF16305C),
+                                      color: primaryTextColor,
                                     ),
                                   ),
                                 ],
@@ -262,9 +270,9 @@ class TeacherDetailsScreen extends StatelessWidget {
                               const SizedBox(height: 10),
                               Text(
                                 'Monthly: Rs.${teacher.salary.toStringAsFixed(0)}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.black87,
+                                  color: primaryTextColor,
                                 ),
                               ),
                             ],
@@ -276,7 +284,7 @@ class TeacherDetailsScreen extends StatelessWidget {
                           margin: const EdgeInsets.only(bottom: 16, left: 8),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cardColor,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -290,19 +298,19 @@ class TeacherDetailsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                children: const [
-                                  Icon(
+                                children: [
+                                  const Icon(
                                     Icons.calendar_today_outlined,
                                     size: 18,
                                     color: Color(0xFF16305C),
                                   ),
-                                  SizedBox(width: 6),
+                                  const SizedBox(width: 6),
                                   Text(
                                     'Joining Date',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 15,
-                                      color: Color(0xFF16305C),
+                                      color: primaryTextColor,
                                     ),
                                   ),
                                 ],
@@ -310,9 +318,9 @@ class TeacherDetailsScreen extends StatelessWidget {
                               const SizedBox(height: 10),
                               Text(
                                 '${teacher.joiningDate.day}/${teacher.joiningDate.month}/${teacher.joiningDate.year}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.black87,
+                                  color: primaryTextColor,
                                 ),
                               ),
                             ],
@@ -322,10 +330,10 @@ class TeacherDetailsScreen extends StatelessWidget {
                     ],
                   ),
 
-                  // Assigned Batches
                   Align(
                     alignment: Alignment.centerLeft,
                     child: _sectionCard(
+                      context,
                       icon: Icons.groups_outlined,
                       title: 'Assigned Batches',
                       children: [
@@ -360,7 +368,6 @@ class TeacherDetailsScreen extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  // Edit / Delete buttons
                   Row(
                     children: [
                       Expanded(

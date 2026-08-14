@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/teacher_provider.dart';
 import '../../models/teacher_model.dart';
 import 'teacher_add_screen.dart';
@@ -47,44 +48,50 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     final teacherProvider = Provider.of<TeacherProvider>(context);
     final teachers = teacherProvider.teachers;
 
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final cardColor = AppDynamicColors.cardBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+    final inputFillColor = AppDynamicColors.inputFill(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
-          // Header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
-                    color: Colors.black,
+                    color: headerTextColor,
                     size: 24,
                   ),
                 ),
                 const SizedBox(width: 16),
-                const Text(
+                Text(
                   'Teacher List',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 22,
-                    color: Colors.black,
+                    color: headerTextColor,
                   ),
                 ),
               ],
             ),
           ),
 
-          // Search bar
           Padding(
             padding: const EdgeInsets.all(16),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: inputFillColor,
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
@@ -96,27 +103,31 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
               ),
               child: TextField(
                 controller: _searchController,
+                style: TextStyle(color: primaryTextColor),
                 onChanged: (value) => teacherProvider.searchTeachers(value),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search Teacher',
-                  hintStyle: TextStyle(fontSize: 13),
-                  prefixIcon: Icon(Icons.search, size: 20),
+                  hintStyle: TextStyle(fontSize: 13, color: secondaryTextColor),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 20,
+                    color: secondaryTextColor,
+                  ),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
           ),
 
-          // List
           Expanded(
             child: teacherProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : teachers.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'No Teacher Found',
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                      style: TextStyle(color: secondaryTextColor, fontSize: 16),
                     ),
                   )
                 : RefreshIndicator(
@@ -126,7 +137,14 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                       itemCount: teachers.length,
                       itemBuilder: (context, index) {
                         final teacher = teachers[index];
-                        return _teacherCard(context, teacher, teacherProvider);
+                        return _teacherCard(
+                          context,
+                          teacher,
+                          teacherProvider,
+                          cardColor,
+                          primaryTextColor,
+                          secondaryTextColor,
+                        );
                       },
                     ),
                   ),
@@ -154,6 +172,9 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     BuildContext context,
     TeacherModel teacher,
     TeacherProvider provider,
+    Color cardColor,
+    Color primaryTextColor,
+    Color secondaryTextColor,
   ) {
     final image = _getTeacherImage(teacher);
 
@@ -161,7 +182,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
@@ -195,10 +216,10 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                   children: [
                     Text(
                       teacher.fullName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF16305C),
+                        color: primaryTextColor,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -213,7 +234,10 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                         Expanded(
                           child: Text(
                             teacher.subject,
-                            style: const TextStyle(fontSize: 14),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: primaryTextColor,
+                            ),
                           ),
                         ),
                       ],
@@ -230,7 +254,10 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                         Expanded(
                           child: Text(
                             teacher.qualification,
-                            style: const TextStyle(fontSize: 14),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: primaryTextColor,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -243,7 +270,10 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                         const SizedBox(width: 6),
                         Text(
                           teacher.phone,
-                          style: const TextStyle(fontSize: 14),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: primaryTextColor,
+                          ),
                         ),
                       ],
                     ),
@@ -253,7 +283,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             ],
           ),
           const SizedBox(height: 14),
-          Divider(color: Colors.grey.shade300),
+          Divider(color: Colors.grey.shade400),
           const SizedBox(height: 10),
           Row(
             children: [

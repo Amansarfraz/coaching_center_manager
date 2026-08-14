@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/batch_provider.dart';
 import '../../providers/student_provider.dart';
 import '../../models/batch_model.dart';
@@ -41,6 +42,14 @@ class _BatchListScreenState extends State<BatchListScreen> {
     final batchProvider = Provider.of<BatchProvider>(context);
     final studentProvider = Provider.of<StudentProvider>(context);
 
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final cardColor = AppDynamicColors.cardBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+    final inputFillColor = AppDynamicColors.inputFill(context);
+
     final batches = _searchQuery.isEmpty
         ? batchProvider.batches
         : batchProvider.batches.where((b) {
@@ -50,14 +59,13 @@ class _BatchListScreenState extends State<BatchListScreen> {
           }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
-          // Header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -68,19 +76,19 @@ class _BatchListScreenState extends State<BatchListScreen> {
                       children: [
                         InkWell(
                           onTap: () => Navigator.pop(context),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back,
-                            color: Colors.black,
+                            color: headerTextColor,
                             size: 24,
                           ),
                         ),
                         const SizedBox(width: 16),
-                        const Text(
+                        Text(
                           'Batch',
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 22,
-                            color: Colors.black,
+                            color: headerTextColor,
                           ),
                         ),
                       ],
@@ -96,8 +104,8 @@ class _BatchListScreenState extends State<BatchListScreen> {
                       },
                       child: Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: cardColor,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -114,19 +122,21 @@ class _BatchListScreenState extends State<BatchListScreen> {
                   padding: const EdgeInsets.only(left: 40),
                   child: Text(
                     '${batchProvider.batches.length} Total Batches',
-                    style: const TextStyle(fontSize: 13, color: Colors.black87),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: headerTextColor.withOpacity(0.85),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
 
-          // Search bar
           Padding(
             padding: const EdgeInsets.all(16),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: inputFillColor,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
@@ -138,32 +148,36 @@ class _BatchListScreenState extends State<BatchListScreen> {
               ),
               child: TextField(
                 controller: _searchController,
+                style: TextStyle(color: primaryTextColor),
                 onChanged: (value) => setState(() => _searchQuery = value),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search by Batch Name, Teacher',
-                  hintStyle: TextStyle(fontSize: 13),
-                  prefixIcon: Icon(Icons.search, size: 20),
-                  suffixIcon: Icon(
+                  hintStyle: TextStyle(fontSize: 13, color: secondaryTextColor),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 20,
+                    color: secondaryTextColor,
+                  ),
+                  suffixIcon: const Icon(
                     Icons.tune,
                     size: 20,
                     color: Color(0xFF16305C),
                   ),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
           ),
 
-          // List
           Expanded(
             child: batchProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : batches.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'No batches found',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: secondaryTextColor),
                     ),
                   )
                 : RefreshIndicator(
@@ -182,6 +196,9 @@ class _BatchListScreenState extends State<BatchListScreen> {
                           batch,
                           studentCount,
                           batchProvider,
+                          cardColor,
+                          primaryTextColor,
+                          secondaryTextColor,
                         );
                       },
                     ),
@@ -197,6 +214,9 @@ class _BatchListScreenState extends State<BatchListScreen> {
     BatchModel batch,
     int studentCount,
     BatchProvider provider,
+    Color cardColor,
+    Color primaryTextColor,
+    Color secondaryTextColor,
   ) {
     return InkWell(
       onTap: () {
@@ -210,7 +230,7 @@ class _BatchListScreenState extends State<BatchListScreen> {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -228,7 +248,7 @@ class _BatchListScreenState extends State<BatchListScreen> {
                 Expanded(
                   child: Text(
                     'Batch Name',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                    style: TextStyle(fontSize: 11, color: secondaryTextColor),
                   ),
                 ),
                 _cardIcon(Icons.edit, const Color(0xFF2F80ED), () {
@@ -251,10 +271,10 @@ class _BatchListScreenState extends State<BatchListScreen> {
             ),
             Text(
               batch.batchName,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 18,
-                color: Color(0xFF16305C),
+                color: primaryTextColor,
               ),
             ),
             const SizedBox(height: 10),
@@ -269,15 +289,16 @@ class _BatchListScreenState extends State<BatchListScreen> {
                         'Assigned Teacher',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey.shade600,
+                          color: secondaryTextColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         batch.teacherName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
+                          color: primaryTextColor,
                         ),
                       ),
                     ],
@@ -291,15 +312,16 @@ class _BatchListScreenState extends State<BatchListScreen> {
                         'Couse Name',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey.shade600,
+                          color: secondaryTextColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         batch.courseName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
+                          color: primaryTextColor,
                         ),
                       ),
                     ],
@@ -319,11 +341,14 @@ class _BatchListScreenState extends State<BatchListScreen> {
                         'Timing',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey.shade600,
+                          color: secondaryTextColor,
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(batch.timing, style: const TextStyle(fontSize: 13)),
+                      Text(
+                        batch.timing,
+                        style: TextStyle(fontSize: 13, color: primaryTextColor),
+                      ),
                     ],
                   ),
                 ),
@@ -335,13 +360,13 @@ class _BatchListScreenState extends State<BatchListScreen> {
                         'No. of Students',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey.shade600,
+                          color: secondaryTextColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '$studentCount students',
-                        style: const TextStyle(fontSize: 13),
+                        style: TextStyle(fontSize: 13, color: primaryTextColor),
                       ),
                     ],
                   ),

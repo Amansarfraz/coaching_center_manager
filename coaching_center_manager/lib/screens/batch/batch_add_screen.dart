@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/batch_provider.dart';
 import '../../providers/teacher_provider.dart';
 import '../../models/batch_model.dart';
@@ -131,12 +132,15 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
     }
   }
 
-  InputDecoration _fieldDecoration(String hint) {
+  InputDecoration _fieldDecoration(BuildContext context, String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+      hintStyle: TextStyle(
+        color: AppDynamicColors.secondaryText(context),
+        fontSize: 13,
+      ),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppDynamicColors.inputFill(context),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
@@ -145,15 +149,15 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
     );
   }
 
-  Widget _label(String text) {
+  Widget _label(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6, top: 14),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 14,
-          color: Color(0xFF16305C),
+          color: AppDynamicColors.primaryText(context),
         ),
       ),
     );
@@ -163,32 +167,36 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
   Widget build(BuildContext context) {
     final batchProvider = Provider.of<BatchProvider>(context);
     final teacherProvider = Provider.of<TeacherProvider>(context);
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
-                    color: Colors.black,
+                    color: headerTextColor,
                     size: 24,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Text(
                   _isEditMode ? 'Edit Batch' : 'Add New Batch',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 22,
-                    color: Colors.black,
+                    color: headerTextColor,
                   ),
                 ),
               ],
@@ -202,23 +210,28 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label('Batch Name:'),
+                    _label(context, 'Batch Name:'),
                     TextFormField(
                       controller: _batchNameController,
-                      decoration: _fieldDecoration('Enter Batch Name'),
+                      style: TextStyle(color: primaryTextColor),
+                      decoration: _fieldDecoration(context, 'Enter Batch Name'),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
 
-                    _label('Course Name:'),
+                    _label(context, 'Course Name:'),
                     TextFormField(
                       controller: _courseNameController,
-                      decoration: _fieldDecoration('Enter Course Name'),
+                      style: TextStyle(color: primaryTextColor),
+                      decoration: _fieldDecoration(
+                        context,
+                        'Enter Course Name',
+                      ),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
 
-                    _label('Teacher:'),
+                    _label(context, 'Teacher:'),
                     teacherProvider.isLoading
                         ? const Padding(
                             padding: EdgeInsets.symmetric(vertical: 10),
@@ -228,7 +241,7 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                         ? Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppDynamicColors.inputFill(context),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Text(
@@ -238,7 +251,12 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                           )
                         : DropdownButtonFormField<String>(
                             value: _selectedTeacherId,
-                            decoration: _fieldDecoration('Select Teacher'),
+                            dropdownColor: AppDynamicColors.cardBg(context),
+                            style: TextStyle(color: primaryTextColor),
+                            decoration: _fieldDecoration(
+                              context,
+                              'Select Teacher',
+                            ),
                             isExpanded: true,
                             items: teacherProvider.teachers
                                 .map(
@@ -252,34 +270,44 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                                 setState(() => _selectedTeacherId = value),
                           ),
 
-                    _label('Class Room:'),
+                    _label(context, 'Class Room:'),
                     TextFormField(
                       controller: _classroomController,
-                      decoration: _fieldDecoration('Enter Class Room e.g. A1'),
+                      style: TextStyle(color: primaryTextColor),
+                      decoration: _fieldDecoration(
+                        context,
+                        'Enter Class Room e.g. A1',
+                      ),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
 
-                    _label('Batch Timing:'),
+                    _label(context, 'Batch Timing:'),
                     TextFormField(
                       controller: _timingController,
+                      style: TextStyle(color: primaryTextColor),
                       decoration: _fieldDecoration(
+                        context,
                         'Select Timing (e.g. M-W-F 10-12)',
                       ),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
 
-                    _label('Student Capacity:'),
+                    _label(context, 'Student Capacity:'),
                     TextFormField(
                       controller: _capacityController,
+                      style: TextStyle(color: primaryTextColor),
                       keyboardType: TextInputType.number,
-                      decoration: _fieldDecoration('Enter Capacity (e.g. 50)'),
+                      decoration: _fieldDecoration(
+                        context,
+                        'Enter Capacity (e.g. 50)',
+                      ),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Required' : null,
                     ),
 
-                    _label('Start Date:'),
+                    _label(context, 'Start Date:'),
                     InkWell(
                       onTap: () => _pickDate(isStart: true),
                       child: Container(
@@ -289,7 +317,7 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                           vertical: 14,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppDynamicColors.inputFill(context),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -298,15 +326,15 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                               : _formatDate(_startDate),
                           style: TextStyle(
                             color: _startDate == null
-                                ? Colors.grey
-                                : Colors.black,
+                                ? AppDynamicColors.secondaryText(context)
+                                : primaryTextColor,
                             fontSize: 13,
                           ),
                         ),
                       ),
                     ),
 
-                    _label('End Date:'),
+                    _label(context, 'End Date:'),
                     InkWell(
                       onTap: () => _pickDate(isStart: false),
                       child: Container(
@@ -316,7 +344,7 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                           vertical: 14,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppDynamicColors.inputFill(context),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -325,8 +353,8 @@ class _BatchAddScreenState extends State<BatchAddScreen> {
                               : _formatDate(_endDate),
                           style: TextStyle(
                             color: _endDate == null
-                                ? Colors.grey
-                                : Colors.black,
+                                ? AppDynamicColors.secondaryText(context)
+                                : primaryTextColor,
                             fontSize: 13,
                           ),
                         ),

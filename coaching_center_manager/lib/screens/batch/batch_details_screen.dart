@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/batch_provider.dart';
 import '../../providers/student_provider.dart';
 import '../../providers/attendance_provider.dart';
@@ -46,31 +47,38 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
     final absentPct = total == 0 ? 0.0 : absent / total;
     final leavePct = total == 0 ? 0.0 : leave / total;
 
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+    final cardColor = AppDynamicColors.cardBg(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
-                    color: Colors.black,
+                    color: headerTextColor,
                     size: 24,
                   ),
                 ),
                 const SizedBox(width: 16),
-                const Text(
+                Text(
                   'Batch Details',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 22,
-                    color: Colors.black,
+                    color: headerTextColor,
                   ),
                 ),
               ],
@@ -85,7 +93,7 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -104,19 +112,19 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Batch Name',
                                     style: TextStyle(
                                       fontSize: 11,
-                                      color: Colors.grey,
+                                      color: secondaryTextColor,
                                     ),
                                   ),
                                   Text(
                                     widget.batch.batchName,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.w800,
                                       fontSize: 17,
-                                      color: Color(0xFF16305C),
+                                      color: primaryTextColor,
                                     ),
                                   ),
                                 ],
@@ -126,18 +134,19 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Assigned Teacher',
                                     style: TextStyle(
                                       fontSize: 11,
-                                      color: Colors.grey,
+                                      color: secondaryTextColor,
                                     ),
                                   ),
                                   Text(
                                     widget.batch.teacherName,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 15,
+                                      color: primaryTextColor,
                                     ),
                                   ),
                                 ],
@@ -146,10 +155,14 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
                           ],
                         ),
                         const Divider(height: 24),
-                        _detailRow('Timing', widget.batch.timing),
-                        _detailRow('Course', widget.batch.courseName),
-                        _detailRow('Classroom', widget.batch.classroom),
-                        _detailRow('Total Students', '$studentCount'),
+                        _detailRow(context, 'Timing', widget.batch.timing),
+                        _detailRow(context, 'Course', widget.batch.courseName),
+                        _detailRow(
+                          context,
+                          'Classroom',
+                          widget.batch.classroom,
+                        ),
+                        _detailRow(context, 'Total Students', '$studentCount'),
                       ],
                     ),
                   ),
@@ -160,7 +173,7 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -172,12 +185,12 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
                     ),
                     child: Column(
                       children: [
-                        const Text(
+                        Text(
                           'Attendance Overview',
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
-                            color: Color(0xFF16305C),
+                            color: primaryTextColor,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -199,10 +212,10 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
                               ),
                               Text(
                                 '${percentage.toStringAsFixed(0)}%',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w800,
-                                  color: Color(0xFF16305C),
+                                  color: primaryTextColor,
                                 ),
                               ),
                             ],
@@ -213,14 +226,17 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             _legendDot(
+                              context,
                               const Color(0xFF27AE60),
                               'Present: ${(presentPct * 100).toStringAsFixed(0)}%',
                             ),
                             _legendDot(
+                              context,
                               const Color(0xFFF2C94C),
                               'Leave: ${(leavePct * 100).toStringAsFixed(0)}%',
                             ),
                             _legendDot(
+                              context,
                               const Color(0xFFEB5757),
                               'Absent: ${(absentPct * 100).toStringAsFixed(0)}%',
                             ),
@@ -228,9 +244,12 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
                         ),
                         if (total == 0) ...[
                           const SizedBox(height: 12),
-                          const Text(
+                          Text(
                             'No attendance records yet',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: secondaryTextColor,
+                            ),
                           ),
                         ],
                       ],
@@ -290,7 +309,7 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
     );
   }
 
-  Widget _detailRow(String label, String value) {
+  Widget _detailRow(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -299,13 +318,20 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
             width: 110,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 13,
+                color: AppDynamicColors.secondaryText(context),
+              ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppDynamicColors.primaryText(context),
+              ),
             ),
           ),
         ],
@@ -313,7 +339,7 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
     );
   }
 
-  Widget _legendDot(Color color, String label) {
+  Widget _legendDot(BuildContext context, Color color, String label) {
     return Column(
       children: [
         Container(
@@ -324,7 +350,10 @@ class _BatchDetailsScreenState extends State<BatchDetailsScreen> {
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(fontSize: 10, color: Colors.black87),
+          style: TextStyle(
+            fontSize: 10,
+            color: AppDynamicColors.primaryText(context),
+          ),
         ),
       ],
     );

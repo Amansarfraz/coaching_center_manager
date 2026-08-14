@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/batch_provider.dart';
 import '../../providers/student_provider.dart';
 import '../../providers/attendance_provider.dart';
@@ -40,24 +41,36 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
 
   Future<void> _pickBatch() async {
     final batchProvider = Provider.of<BatchProvider>(context, listen: false);
+    final cardColor = AppDynamicColors.cardBg(context);
+    final textColor = AppDynamicColors.primaryText(context);
+
     final selected = await showModalBottomSheet<BatchModel>(
       context: context,
+      backgroundColor: cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.all(16),
-          children: batchProvider.batches
-              .map(
-                (b) => ListTile(
-                  title: Text(b.batchName),
-                  subtitle: Text(b.teacherName),
-                  onTap: () => Navigator.pop(context, b),
-                ),
-              )
-              .toList(),
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(16),
+            children: batchProvider.batches
+                .map(
+                  (b) => ListTile(
+                    title: Text(
+                      b.batchName,
+                      style: TextStyle(color: textColor),
+                    ),
+                    subtitle: Text(
+                      b.teacherName,
+                      style: TextStyle(color: textColor.withOpacity(0.7)),
+                    ),
+                    onTap: () => Navigator.pop(context, b),
+                  ),
+                )
+                .toList(),
+          ),
         );
       },
     );
@@ -177,6 +190,13 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
     final studentProvider = Provider.of<StudentProvider>(context);
     final attendanceProvider = Provider.of<AttendanceProvider>(context);
 
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+    final cardColor = AppDynamicColors.cardBg(context);
+
     final batchStudents = _selectedBatch == null
         ? <StudentModel>[]
         : studentProvider.students
@@ -184,13 +204,13 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
               .toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -198,27 +218,31 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                   children: [
                     InkWell(
                       onTap: () => Navigator.pop(context),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_back,
-                        color: Colors.black,
+                        color: headerTextColor,
                         size: 24,
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Text(
+                    Text(
                       'Mark Attendance',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 20,
-                        color: Colors.black,
+                        color: headerTextColor,
                       ),
                     ),
                   ],
                 ),
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 16,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.search, size: 18, color: Color(0xFF16305C)),
+                  backgroundColor: cardColor,
+                  child: const Icon(
+                    Icons.search,
+                    size: 18,
+                    color: Color(0xFF16305C),
+                  ),
                 ),
               ],
             ),
@@ -232,7 +256,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
@@ -250,18 +274,18 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                         children: [
                           Text(
                             'Batch: ${_selectedBatch?.batchName ?? "Tap to select"}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
-                              color: Color(0xFF16305C),
+                              color: primaryTextColor,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Date: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey,
+                              color: secondaryTextColor,
                             ),
                           ),
                         ],
@@ -283,17 +307,17 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
 
           Expanded(
             child: _selectedBatch == null
-                ? const Center(
+                ? Center(
                     child: Text(
                       'Select a batch to mark attendance',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: secondaryTextColor),
                     ),
                   )
                 : batchStudents.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'No students in this batch',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: secondaryTextColor),
                     ),
                   )
                 : ListView.builder(
@@ -306,7 +330,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: cardColor,
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
@@ -334,9 +358,10 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                             Expanded(
                               child: Text(
                                 student.fullName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
+                                  color: primaryTextColor,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),

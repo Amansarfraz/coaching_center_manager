@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
 
@@ -8,27 +9,33 @@ class LogoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerColor = AppDynamicColors.headerBg(context);
+    final headerTextColor = AppDynamicColors.headerText(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final cardColor = AppDynamicColors.cardBg(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF86BFE2)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.arrow_back, color: Colors.black),
+                  child: Icon(Icons.arrow_back, color: headerTextColor),
                 ),
                 const SizedBox(width: 16),
-                const Text(
+                Text(
                   'Logout',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 22,
-                    color: Colors.black,
+                    color: headerTextColor,
                   ),
                 ),
               ],
@@ -54,13 +61,13 @@ class LogoutScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       'Are you sure you want to log out?',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 17,
-                        color: Color(0xFF16305C),
+                        color: primaryTextColor,
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -68,7 +75,7 @@ class LogoutScreen extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardColor,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(

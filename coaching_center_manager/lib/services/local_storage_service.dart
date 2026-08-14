@@ -58,4 +58,15 @@ class LocalStorageService {
     await prefs.remove(_userNameKey);
     await prefs.remove(_userRoleKey);
   }
+
+  // ---------------- THEME ----------------
+  static Future<void> saveDarkMode(bool isDark) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_dark_mode', isDark);
+  }
+
+  static Future<bool> getDarkMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('is_dark_mode') ?? false;
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/batch_provider.dart';
 import '../../providers/attendance_provider.dart';
 import '../../models/batch_model.dart';
@@ -37,37 +38,6 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     }
   }
 
-  Future<void> _pickBatch() async {
-    final batchProvider = Provider.of<BatchProvider>(context, listen: false);
-    final selected = await showModalBottomSheet<BatchModel>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.all(16),
-            children: batchProvider.batches
-                .map(
-                  (b) => ListTile(
-                    title: Text(b.batchName),
-                    subtitle: Text(b.teacherName),
-                    onTap: () => Navigator.pop(context, b),
-                  ),
-                )
-                .toList(),
-          ),
-        );
-      },
-    );
-    if (selected != null) {
-      setState(() => _selectedBatch = selected);
-      _fetchHistory();
-    }
-  }
-
   void _fetchHistory() {
     if (_selectedBatch != null) {
       Provider.of<AttendanceProvider>(
@@ -88,24 +58,6 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     }
   }
 
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final batchProvider = Provider.of<BatchProvider>(context);
@@ -117,20 +69,27 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     final absent = records.where((r) => r.status == 'absent').length;
     final leave = records.where((r) => r.status == 'leave').length;
     final presentPct = total == 0 ? 0.0 : (present / total) * 100;
-    final absentPct = total == 0 ? 0.0 : (absent / total) * 100;
-    final leavePct = total == 0 ? 0.0 : (leave / total) * 100;
+
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final headerTextColor = Colors.white;
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+    final cardColor = AppDynamicColors.cardBg(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerColor = isDark
+        ? const Color(0xFF0D1E33)
+        : const Color(0xFF16305C);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
-          // Header — dark navy
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 24),
-            decoration: const BoxDecoration(
-              color: Color(0xFF16305C),
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: headerColor,
+              borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(28),
                 bottomRight: Radius.circular(28),
               ),
@@ -142,27 +101,27 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                   children: [
                     InkWell(
                       onTap: () => Navigator.pop(context),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_back,
-                        color: Colors.white,
+                        color: headerTextColor,
                         size: 24,
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Attendance History',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 20,
-                        color: Colors.white,
+                        color: headerTextColor,
                       ),
                     ),
                   ],
                 ),
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 18,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, color: Color(0xFF16305C)),
+                  child: Icon(Icons.person, color: headerColor),
                 ),
               ],
             ),
@@ -174,7 +133,6 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Date Picker + Batch Selector
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -182,12 +140,12 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Date Picker',
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
-                                color: Color(0xFF16305C),
+                                color: primaryTextColor,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -199,7 +157,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                   vertical: 14,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: cardColor,
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
@@ -219,18 +177,19 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        _formatDate(_selectedDate),
-                                        style: const TextStyle(
+                                        '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                                        style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
+                                          color: primaryTextColor,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    const Icon(
+                                    Icon(
                                       Icons.chevron_right,
                                       size: 16,
-                                      color: Colors.grey,
+                                      color: secondaryTextColor,
                                     ),
                                   ],
                                 ),
@@ -244,24 +203,65 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Batch Selector',
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
-                                color: Color(0xFF16305C),
+                                color: primaryTextColor,
                               ),
                             ),
                             const SizedBox(height: 8),
                             InkWell(
-                              onTap: _pickBatch,
+                              onTap: () async {
+                                final selected =
+                                    await showModalBottomSheet<BatchModel>(
+                                      context: context,
+                                      backgroundColor: cardColor,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(20),
+                                        ),
+                                      ),
+                                      builder: (context) => SafeArea(
+                                        child: ListView(
+                                          shrinkWrap: true,
+                                          padding: const EdgeInsets.all(16),
+                                          children: batchProvider.batches
+                                              .map(
+                                                (b) => ListTile(
+                                                  title: Text(
+                                                    b.batchName,
+                                                    style: TextStyle(
+                                                      color: primaryTextColor,
+                                                    ),
+                                                  ),
+                                                  subtitle: Text(
+                                                    b.teacherName,
+                                                    style: TextStyle(
+                                                      color: secondaryTextColor,
+                                                    ),
+                                                  ),
+                                                  onTap: () =>
+                                                      Navigator.pop(context, b),
+                                                ),
+                                              )
+                                              .toList(),
+                                        ),
+                                      ),
+                                    );
+                                if (selected != null) {
+                                  setState(() => _selectedBatch = selected);
+                                  _fetchHistory();
+                                }
+                              },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
                                   vertical: 14,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: cardColor,
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
@@ -277,17 +277,18 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                       child: Text(
                                         _selectedBatch?.batchName ??
                                             'Select Batch',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
+                                          color: primaryTextColor,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    const Icon(
+                                    Icon(
                                       Icons.arrow_drop_down,
                                       size: 18,
-                                      color: Colors.grey,
+                                      color: secondaryTextColor,
                                     ),
                                   ],
                                 ),
@@ -302,12 +303,12 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                   const SizedBox(height: 16),
 
                   if (_selectedBatch == null)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 40),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
                       child: Center(
                         child: Text(
                           'Select a batch to view attendance history',
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: secondaryTextColor),
                         ),
                       ),
                     )
@@ -317,7 +318,6 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                       child: Center(child: CircularProgressIndicator()),
                     )
                   else ...[
-                    // Total Students + Donut
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -325,7 +325,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: cardColor,
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
@@ -352,34 +352,18 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                       ),
                                     ),
                                     const SizedBox(width: 8),
-                                    const Expanded(
+                                    Expanded(
                                       child: Text(
                                         'Total Students',
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color: Colors.grey,
+                                          color: secondaryTextColor,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 2,
-                                    bottom: 10,
-                                  ),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      '$total',
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF16305C),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                const SizedBox(height: 10),
                                 SizedBox(
                                   height: 90,
                                   width: 90,
@@ -402,10 +386,10 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                       ),
                                       Text(
                                         '$total',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.w800,
-                                          color: Color(0xFF16305C),
+                                          color: primaryTextColor,
                                         ),
                                       ),
                                     ],
@@ -429,22 +413,24 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                           child: Column(
                             children: [
                               _statBar(
+                                context,
                                 icon: Icons.block,
                                 iconColor: const Color(0xFFEB5757),
                                 iconBg: const Color(0xFFFDE8EA),
                                 title: 'Absent: $absent',
                                 count: absent,
-                                pct: absentPct,
+                                total: total,
                                 barColor: const Color(0xFFEB5757),
                               ),
                               const SizedBox(height: 12),
                               _statBar(
+                                context,
                                 icon: Icons.beach_access,
                                 iconColor: const Color(0xFFF2994A),
                                 iconBg: const Color(0xFFFFF3E0),
                                 title: 'On Leave: $leave',
                                 count: leave,
-                                pct: leavePct,
+                                total: total,
                                 barColor: const Color(0xFFF2994A),
                               ),
                             ],
@@ -455,15 +441,17 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
 
                     const SizedBox(height: 20),
 
-                    // Student list
                     if (records.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 30),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 30),
                         child: Center(
                           child: Text(
                             'No attendance record found for this batch on this date.\nMark attendance first from "Record Attendance".',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey, fontSize: 13),
+                            style: TextStyle(
+                              color: secondaryTextColor,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       )
@@ -473,7 +461,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cardColor,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -501,9 +489,10 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                   children: [
                                     Text(
                                       record.studentName,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                         fontSize: 14,
+                                        color: primaryTextColor,
                                       ),
                                     ),
                                     const SizedBox(height: 6),
@@ -578,19 +567,25 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     );
   }
 
-  Widget _statBar({
+  Widget _statBar(
+    BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required Color iconBg,
     required String title,
     required int count,
-    required double pct,
+    required int total,
     required Color barColor,
   }) {
+    final pct = total == 0 ? 0.0 : (count / total) * 100;
+    final cardColor = AppDynamicColors.cardBg(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -617,9 +612,10 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
+                    color: primaryTextColor,
                   ),
                 ),
               ),
@@ -652,9 +648,9 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
               Text(
                 '$count\n(${pct.toStringAsFixed(0)}%)',
                 textAlign: TextAlign.right,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 10,
-                  color: Colors.grey,
+                  color: secondaryTextColor,
                   height: 1.3,
                 ),
               ),

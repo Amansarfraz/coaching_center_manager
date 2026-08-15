@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/fee_provider.dart';
 import '../../models/fee_model.dart';
 import 'add_fee_screen.dart';
@@ -40,6 +41,15 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
   Widget build(BuildContext context) {
     final feeProvider = Provider.of<FeeProvider>(context);
 
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+    final cardColor = AppDynamicColors.cardBg(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerColor = isDark
+        ? const Color(0xFF0D1E33)
+        : const Color(0xFF16305C);
+
     final records = feeProvider.feeRecords.where((f) {
       final q = _searchController.text.toLowerCase();
       if (q.isEmpty) return true;
@@ -48,13 +58,13 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF16305C)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -75,10 +85,10 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
                     ),
                   ],
                 ),
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 16,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 18, color: Color(0xFF16305C)),
+                  backgroundColor: cardColor,
+                  child: Icon(Icons.person, size: 18, color: headerColor),
                 ),
               ],
             ),
@@ -87,17 +97,19 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
             padding: const EdgeInsets.all(16),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardColor,
                 borderRadius: BorderRadius.circular(30),
               ),
               child: TextField(
                 controller: _searchController,
+                style: TextStyle(color: primaryTextColor),
                 onChanged: (v) => setState(() {}),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search Student or Batch',
-                  prefixIcon: Icon(Icons.search),
+                  hintStyle: TextStyle(color: secondaryTextColor),
+                  prefixIcon: Icon(Icons.search, color: secondaryTextColor),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
@@ -117,8 +129,9 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
                     label: Text(month, style: const TextStyle(fontSize: 12)),
                     selected: isSelected,
                     selectedColor: const Color(0xFF2F80ED),
+                    backgroundColor: cardColor,
                     labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black87,
+                      color: isSelected ? Colors.white : primaryTextColor,
                     ),
                     onSelected: (_) {
                       setState(
@@ -136,16 +149,22 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
             child: feeProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : records.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'No fee records found',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: secondaryTextColor),
                     ),
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: records.length,
-                    itemBuilder: (context, index) => _feeCard(records[index]),
+                    itemBuilder: (context, index) => _feeCard(
+                      context,
+                      records[index],
+                      cardColor,
+                      primaryTextColor,
+                      secondaryTextColor,
+                    ),
                   ),
           ),
           Padding(
@@ -160,7 +179,7 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF16305C),
+                  backgroundColor: headerColor,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -176,13 +195,19 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
     );
   }
 
-  Widget _feeCard(FeeModel fee) {
+  Widget _feeCard(
+    BuildContext context,
+    FeeModel fee,
+    Color cardColor,
+    Color primaryTextColor,
+    Color secondaryTextColor,
+  ) {
     final progress = fee.totalFee == 0 ? 0.0 : fee.paidAmount / fee.totalFee;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -208,9 +233,10 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
                 ),
                 Text(
                   '${(progress * 100).toStringAsFixed(0)}%',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
+                    color: primaryTextColor,
                   ),
                 ),
               ],
@@ -226,9 +252,10 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
                     Expanded(
                       child: Text(
                         fee.studentName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
+                          color: primaryTextColor,
                         ),
                       ),
                     ),
@@ -254,20 +281,20 @@ class _FeeRecordsScreenState extends State<FeeRecordsScreen> {
                 ),
                 Text(
                   'Batch: ${fee.batchName}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: secondaryTextColor),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Total Fee: Rs.${fee.totalFee.toStringAsFixed(0)}',
-                  style: const TextStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 12, color: primaryTextColor),
                 ),
                 Text(
                   'Remaining: Rs.${fee.remainingBalance.toStringAsFixed(0)}',
-                  style: const TextStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 12, color: primaryTextColor),
                 ),
                 Text(
                   'Payment Date: ${fee.paymentDate.day}/${fee.paymentDate.month}/${fee.paymentDate.year}',
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  style: TextStyle(fontSize: 11, color: secondaryTextColor),
                 ),
               ],
             ),

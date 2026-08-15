@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../constants/app_dynamic_colors.dart';
 import '../../providers/fee_provider.dart';
 import '../../providers/student_provider.dart';
 import '../../models/student_model.dart';
@@ -39,8 +40,12 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
       context,
       listen: false,
     );
+    final cardColor = AppDynamicColors.cardBg(context);
+    final textColor = AppDynamicColors.primaryText(context);
+
     final selected = await showModalBottomSheet<StudentModel>(
       context: context,
+      backgroundColor: cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -51,8 +56,11 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
           children: studentProvider.students
               .map(
                 (s) => ListTile(
-                  title: Text(s.fullName),
-                  subtitle: Text(s.batchName),
+                  title: Text(s.fullName, style: TextStyle(color: textColor)),
+                  subtitle: Text(
+                    s.batchName,
+                    style: TextStyle(color: textColor.withOpacity(0.7)),
+                  ),
                   onTap: () => Navigator.pop(context, s),
                 ),
               )
@@ -84,7 +92,6 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
     }
 
     final feeProvider = Provider.of<FeeProvider>(context, listen: false);
-
     final totalFee = _selectedStudent!.monthlyFee;
     final paid = double.tryParse(_paidAmountController.text.trim()) ?? 0;
 
@@ -118,6 +125,9 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
 
   Widget _methodButton(String value, String label, IconData icon) {
     final isSelected = _paymentMethod == value;
+    final cardColor = AppDynamicColors.cardBg(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _paymentMethod = value),
@@ -125,12 +135,12 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF16305C) : Colors.white,
+            color: isSelected ? const Color(0xFF16305C) : cardColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected
                   ? const Color(0xFF16305C)
-                  : Colors.grey.shade300,
+                  : Colors.grey.shade400,
             ),
           ),
           child: Column(
@@ -138,14 +148,14 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
               Icon(
                 icon,
                 size: 18,
-                color: isSelected ? Colors.white : Colors.black54,
+                color: isSelected ? Colors.white : primaryTextColor,
               ),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 11,
-                  color: isSelected ? Colors.white : Colors.black87,
+                  color: isSelected ? Colors.white : primaryTextColor,
                 ),
               ),
             ],
@@ -162,14 +172,23 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
     final paid = double.tryParse(_paidAmountController.text.trim()) ?? 0;
     final remaining = totalFee - paid;
 
+    final bgColor = AppDynamicColors.scaffoldBg(context);
+    final primaryTextColor = AppDynamicColors.primaryText(context);
+    final secondaryTextColor = AppDynamicColors.secondaryText(context);
+    final inputFillColor = AppDynamicColors.inputFill(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerColor = isDark
+        ? const Color(0xFF0D1E33)
+        : const Color(0xFF16305C);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F3FB),
+      backgroundColor: bgColor,
       body: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            decoration: const BoxDecoration(color: Color(0xFF16305C)),
+            decoration: BoxDecoration(color: headerColor),
             child: Row(
               children: [
                 InkWell(
@@ -202,17 +221,20 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
                         vertical: 14,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: inputFillColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.search, color: Colors.grey),
+                          Icon(Icons.search, color: secondaryTextColor),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               _selectedStudent?.fullName ?? 'Select Student',
-                              style: const TextStyle(fontSize: 14),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: primaryTextColor,
+                              ),
                             ),
                           ),
                         ],
@@ -221,26 +243,31 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  const Text(
+                  Text(
                     'Fee Month',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: Color(0xFF16305C),
+                      color: primaryTextColor,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: inputFillColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: _selectedMonth,
-                        hint: const Text('Select month'),
+                        dropdownColor: AppDynamicColors.cardBg(context),
+                        hint: Text(
+                          'Select month',
+                          style: TextStyle(color: secondaryTextColor),
+                        ),
                         isExpanded: true,
+                        style: TextStyle(color: primaryTextColor),
                         items: _months
                             .map(
                               (m) => DropdownMenuItem(value: m, child: Text(m)),
@@ -296,23 +323,25 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Enter Paid Amount',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
-                                color: Color(0xFF16305C),
+                                color: primaryTextColor,
                               ),
                             ),
                             const SizedBox(height: 6),
                             TextField(
                               controller: _paidAmountController,
                               keyboardType: TextInputType.number,
+                              style: TextStyle(color: primaryTextColor),
                               onChanged: (_) => setState(() {}),
                               decoration: InputDecoration(
                                 hintText: 'Rs.0',
+                                hintStyle: TextStyle(color: secondaryTextColor),
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: inputFillColor,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   borderSide: BorderSide.none,
@@ -340,12 +369,12 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
                   ),
 
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'Payment Method',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: Color(0xFF16305C),
+                      color: primaryTextColor,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -366,12 +395,12 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
                   ),
 
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'Payment Date',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: Color(0xFF16305C),
+                      color: primaryTextColor,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -384,7 +413,7 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
                         vertical: 14,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: inputFillColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -397,6 +426,7 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
                           const SizedBox(width: 8),
                           Text(
                             '${_paymentDate.day}/${_paymentDate.month}/${_paymentDate.year}',
+                            style: TextStyle(color: primaryTextColor),
                           ),
                         ],
                       ),
@@ -404,21 +434,23 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
                   ),
 
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'Remarks (Optional)',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: Color(0xFF16305C),
+                      color: primaryTextColor,
                     ),
                   ),
                   const SizedBox(height: 6),
                   TextField(
                     controller: _remarksController,
+                    style: TextStyle(color: primaryTextColor),
                     decoration: InputDecoration(
                       hintText: 'Any additional notes',
+                      hintStyle: TextStyle(color: secondaryTextColor),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: inputFillColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -436,7 +468,7 @@ class _AddFeeScreenState extends State<AddFeeScreen> {
                     child: ElevatedButton(
                       onPressed: feeProvider.isLoading ? null : _savePayment,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF16305C),
+                        backgroundColor: headerColor,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(

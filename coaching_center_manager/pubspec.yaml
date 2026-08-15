@@ -58,6 +58,7 @@ dependencies:
   # Loading Animations
   lottie: ^3.3.2
   dio: ^5.11.0
+  web_socket_channel: ^3.0.3
 
 dev_dependencies:
   flutter_test:

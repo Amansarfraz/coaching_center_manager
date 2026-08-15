@@ -5,6 +5,7 @@ from beanie import PydanticObjectId
 from app.models.fee import Fee
 from app.schemas.fee_schema import FeeCreateSchema, FeeUpdateSchema
 from app.models.notification import Notification
+from app.core.notification_helper import create_and_send_notification
 
 router = APIRouter(prefix="/api/fees", tags=["Fees"])
 
@@ -50,15 +51,27 @@ async def create_fee(data: FeeCreateSchema):
         payment_date=datetime.fromisoformat(data.payment_date),
         status=status,
     )
-    await fee.insert()
+    # Admin ko
+    await create_and_send_notification(
+        title="Fee Payment Recorded",
+        message=f"Rs.{data.paid_amount:.0f} received from {data.student_name} for {data.fee_month}",
+        target_role="admin",
+        related_type="fee",
+    )
 
-    # Notification for admin
+    # Student ko bhi
+    await create_and_send_notification(
+        title="Fee Payment Confirmed",
+        message=f"Your payment of Rs.{data.paid_amount:.0f} for {data.fee_month} has been received",
+        target_role="student",
+        related_type="fee",
+    )
+   
     notif = Notification(
         title="Fee Payment Recorded",
         message=f"Rs.{data.paid_amount:.0f} received from {data.student_name} for {data.fee_month}",
         target_role="admin",
         related_type="fee",
-        is_read=False,
         created_at=datetime.utcnow(),
     )
     await notif.insert()

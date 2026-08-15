@@ -5,6 +5,7 @@ from beanie import PydanticObjectId
 from app.models.teacher import Teacher
 from app.schemas.teacher_schema import TeacherCreateSchema, TeacherUpdateSchema
 from app.models.notification import Notification
+from app.core.notification_helper import create_and_send_notification
 
 router = APIRouter(prefix="/api/teachers", tags=["Teachers"])
 
@@ -51,6 +52,12 @@ async def create_teacher(data: TeacherCreateSchema):
         profile_image=data.profile_image,
     )
     await teacher.insert()
+    await create_and_send_notification(
+        title="New Teacher Added",
+        message=f"{data.full_name} joined as {data.subject} teacher",
+        target_role="admin",
+        related_type="teacher",
+    )
     notif = Notification(
         title="New Teacher Added",
         message=f"{data.full_name} joined as {data.subject} teacher",

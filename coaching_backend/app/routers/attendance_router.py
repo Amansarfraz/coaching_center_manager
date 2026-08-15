@@ -3,6 +3,7 @@ from datetime import datetime
 
 from app.models.attendance import Attendance
 from app.models.batch import Batch
+from app.core.notification_helper import create_and_send_notification
 from app.schemas.attendance_schema import AttendanceMarkSchema
 
 router = APIRouter(prefix="/api/attendance", tags=["Attendance"])
@@ -32,6 +33,12 @@ async def mark_attendance(data: AttendanceMarkSchema):
             marked_by="admin",
         )
         await attendance.insert()
+        await create_and_send_notification(
+        title="Attendance Marked",
+        message=f"Attendance has been recorded for {batch_name}",
+        target_role="student",
+        related_type="attendance",
+    )
 
     return {"message": "Attendance marked successfully"}
 

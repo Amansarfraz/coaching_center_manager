@@ -200,7 +200,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final dashboardProvider = Provider.of<DashboardProvider>(context);
     final notifProvider = Provider.of<NotificationProvider>(context);
 
-    final userName = authProvider.currentUser?.fullName ?? 'Admin';
+    final userName = authProvider.currentUser?.displayName ?? 'Admin';
     final totalStudents = studentProvider.students.length;
     final totalTeachers = teacherProvider.teachers.length;
     final totalBatches = batchProvider.batches.length;

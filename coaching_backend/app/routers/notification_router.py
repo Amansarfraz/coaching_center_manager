@@ -1,21 +1,18 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from beanie import PydanticObjectId
 
 from app.models.notification import Notification
+from app.core.websocket_manager import manager
 
 router = APIRouter(prefix="/api/notifications", tags=["Notifications"])
 
 
 @router.get("")
 async def get_notifications(role: str):
-    records = await Notification.find(
-        Notification.target_role == role
-    ).sort("-created_at").to_list()
-
+    records = await Notification.find(Notification.target_role == role).sort("-created_at").to_list()
     all_records = await Notification.find(Notification.target_role == "all").sort("-created_at").to_list()
     combined = records + all_records
     combined.sort(key=lambda n: n.created_at, reverse=True)
-
     return {"notifications": combined}
 
 
@@ -36,3 +33,14 @@ async def mark_all_read(role: str):
         r.is_read = True
         await r.save()
     return {"message": "All marked as read"}
+
+
+@router.websocket("/ws/{role}")
+async def websocket_endpoint(websocket: WebSocket, role: str):
+    await manager.connect(websocket, role)
+    try:
+        while True:
+            # Connection ko zinda rakhne ke liye client se koi bhi message aane ka wait karo
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, role)

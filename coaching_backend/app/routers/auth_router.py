@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from app.models.user import User
 from app.schemas.auth_schema import SignupSchema, LoginSchema, TokenResponse, UserResponse
 from app.core.security import hash_password, verify_password, create_access_token
+from app.core.notification_helper import create_and_send_notification
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
@@ -21,6 +22,12 @@ async def signup(data: SignupSchema):
         role=data.role,
     )
     await user.insert()
+    await create_and_send_notification(
+        title="New Batch Assigned",
+        message=f"You have been assigned to {data.batch_name} ({data.course_name})",
+        target_role="teacher",
+        related_type="batch",
+    )
 
     return {"message": "Account created successfully"}
 

@@ -4,6 +4,8 @@ from beanie import PydanticObjectId
 
 from app.models.student import Student
 from app.schemas.student_schema import StudentCreateSchema, StudentUpdateSchema
+#from app.core.notification_helper import create_and_send_notification
+from app.core.notification_helper import create_and_send_notification
 from app.models.notification import Notification
 from datetime import datetime
 
@@ -56,6 +58,12 @@ async def create_student(data: StudentCreateSchema):
         profile_image=data.profile_image,
     )
     await student.insert()
+    await create_and_send_notification(
+        title="New Student Added",
+        message=f"{data.full_name} joined {data.batch_name}",
+        target_role="admin",
+        related_type="student",
+    )
     notif = Notification(
         title="New Student Added",
         message=f"{data.full_name} joined {data.batch_name}",

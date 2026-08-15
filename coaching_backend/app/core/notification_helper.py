@@ -14,7 +14,6 @@ async def create_and_send_notification(title: str, message: str, target_role: st
     )
     await notif.insert()
 
-    # WebSocket se real-time bhejo
     await manager.send_to_role(
         target_role,
         {

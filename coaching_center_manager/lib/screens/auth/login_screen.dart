@@ -15,9 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  String _selectedRole = 'Student'; // Student, Teacher, Admin
+  String _selectedRole = 'Student'; // Student, Teacher, Admin - UI selection
 
-  // Simple, correct email regex: kuch@kuch.kuch (min 2 letters after dot)
   final RegExp _emailRegex = RegExp(r'^[\w\.\-]+@[\w\-]+\.[a-zA-Z]{2,}$');
 
   @override
@@ -60,12 +59,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      // Backend se aaya asal role use karo (Login form ka selected role sirf UI hint hai)
-      final actualRole = authProvider.userRole ?? _selectedRole.toLowerCase();
-
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => DashboardScreen(role: actualRole)),
+        MaterialPageRoute(builder: (_) => DashboardScreen(role: _selectedRole)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -113,8 +109,6 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 10),
               Image.asset('assets/images/logo.png', width: 110, height: 110),
-              const SizedBox(height: 8),
-
               const SizedBox(height: 24),
 
               const Text(
@@ -128,7 +122,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 24),
 
-              // Email Field
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -151,7 +144,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 14),
 
-              // Password Field
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -185,7 +177,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 20),
 
-              // Role Selector
               Row(
                 children: [
                   _roleButton('Student'),
@@ -196,7 +187,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 24),
 
-              // Login Button
               SizedBox(
                 width: double.infinity,
                 height: 50,

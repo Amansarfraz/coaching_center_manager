@@ -12,19 +12,16 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  String _selectedRole = 'Admin';
 
   @override
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -33,14 +30,10 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _handleSignup() async {
     final fullName = _fullNameController.text.trim();
     final email = _emailController.text.trim();
-    final phone = _phoneController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    if (fullName.isEmpty ||
-        email.isEmpty ||
-        phone.isEmpty ||
-        password.isEmpty) {
+    if (fullName.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
@@ -65,16 +58,14 @@ class _SignupScreenState extends State<SignupScreen> {
     final success = await authProvider.signup(
       fullName: fullName,
       email: email,
-      phone: phone,
       password: password,
-      role: _selectedRole.toLowerCase(),
     );
 
     if (!mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account created! Please login.')),
+        const SnackBar(content: Text('Account created successfully!')),
       );
       Navigator.pushReplacementNamed(context, '/login_screen');
     } else {
@@ -82,32 +73,6 @@ class _SignupScreenState extends State<SignupScreen> {
         SnackBar(content: Text(authProvider.errorMessage ?? 'Signup failed')),
       );
     }
-  }
-
-  Widget _roleButton(String role) {
-    final bool isSelected = _selectedRole == role;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedRole = role),
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF16305C) : Colors.white,
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: Text(
-            role,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isSelected ? Colors.white : const Color(0xFF16305C),
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _textField({
@@ -152,7 +117,6 @@ class _SignupScreenState extends State<SignupScreen> {
             children: [
               const SizedBox(height: 10),
               Image.asset('assets/images/logo.png', width: 150, height: 150),
-              const SizedBox(height: 8),
               const SizedBox(height: 20),
 
               const Text(
@@ -182,13 +146,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 hint: 'Email',
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
-              ),
-
-              _textField(
-                controller: _phoneController,
-                hint: 'Phone Number',
-                icon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
               ),
 
               _textField(
@@ -222,16 +179,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     () => _obscureConfirmPassword = !_obscureConfirmPassword,
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 6),
-
-              Row(
-                children: [
-                  _roleButton('Admin'),
-                  _roleButton('Teacher'),
-                  _roleButton('Student'),
-                ],
               ),
 
               const SizedBox(height: 24),
